@@ -44,50 +44,48 @@
   <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" src="data.jsx"></script>
 
   <script type="text/babel">
-    const { useState } = React;
+    const { useState, useEffect } = React;
+
+    // --- Project Selection Logic ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectIdFromUrl = urlParams.get('projectId');
+    const projectIdFromStorage = localStorage.getItem('alpsActiveProjectId');
+    const projectId = projectIdFromUrl || projectIdFromStorage || "ALPS-218";
+    const PROJECT = window.PROJECTS.find(p => p.id === projectId) || window.PROJECT;
 
     // --- Data ---
-    const PROJECT = {
-      id: "ALI-42",
-      title: "Recurring Engine — Subscription Billing",
-    };
 
-    const PEOPLE = {
-      rina: { fullName: "Rina Patel", initials: "RP" },
-      maya: { fullName: "Maya Chen", initials: "MC" },
-      mateo: { fullName: "Mateo Rodriguez", initials: "MR" },
-      jun: { fullName: "Jun Park", initials: "JP" },
-      lena: { fullName: "Lena Okafor", initials: "LO" },
-    };
+    const PEOPLE = window.PEOPLE;
 
-    const CYCLES = [
-      { id: "S11", name: "Sprint 11", startDate: "2026-03-23", endDate: "2026-04-05" },
-      { id: "S12", name: "Sprint 12", startDate: "2026-04-06", endDate: "2026-04-19" },
-      { id: "S13", name: "Sprint 13", startDate: "2026-04-20", endDate: "2026-05-03" },
-      { id: "S14", name: "Sprint 14", startDate: "2026-05-04", endDate: "2026-05-17" },
-    ];
+    // Map SPRINTS to CYCLES display format
+    const projectSprints = window.SPRINTS.filter(s => s.projectId === projectId);
+    const CYCLES = projectSprints.map(sprint => ({
+      id: sprint.id,
+      name: sprint.name,
+      startDate: sprint.startDate,
+      endDate: sprint.endDate
+    }));
 
-    const TICKETS = [
-      { id: "LIN-201", title: "Design payment retry state machine", status: "done", priority: "high", assignee: "rina", gate: "business", cycle: "S11", dueDate: "2026-04-02", description: "Define state transitions for payment retry: pending → retrying → success/failed. Include max attempts, backoff strategy, and final failure handling.", gitlab: "MR !115", progress: 100 },
-      { id: "LIN-202", title: "Set up database schema for billing", status: "done", priority: "high", assignee: "jun", gate: "business", cycle: "S11", dueDate: "2026-04-04", description: "Create tables: subscriptions, invoices, payment_attempts, dunning_state. Add indexes for performance.", gitlab: "MR !118", progress: 100 },
-      { id: "LIN-203", title: "Create billing service skeleton", status: "done", priority: "high", assignee: "jun", gate: "business", cycle: "S11", dueDate: "2026-04-06", description: "Set up API endpoints, dependency injection, and configuration management for billing service.", gitlab: "MR !122", progress: 100 },
-      { id: "LIN-204", title: "Auth & permissions for billing admin", status: "done", priority: "medium", assignee: "lena", gate: "business", cycle: "S11", dueDate: "2026-04-08", description: "RBAC for billing admin actions: refund, manual retry, subscription override.", gitlab: "MR !127", progress: 100 },
-      { id: "LIN-205", title: "Implement retry logic with exponential backoff", status: "in_progress", priority: "high", assignee: "jun", gate: "product", cycle: "S12", dueDate: "2026-04-15", description: "Exponential backoff: 2^attempt + jitter (±10%). Max 5 retries. Configurable per product.", gitlab: "MR !132", progress: 75 },
-      { id: "LIN-206", title: "Build billing dashboard UI", status: "in_progress", priority: "high", assignee: "lena", gate: "product", cycle: "S12", dueDate: "2026-04-18", description: "Invoice list, payment history, retry status. Real-time updates via websockets.", gitlab: "MR !135", progress: 60 },
-      { id: "LIN-207", title: "Email notifications for failed payments", status: "done", priority: "medium", assignee: "lena", gate: "product", cycle: "S12", dueDate: "2026-04-20", description: "Transactional emails via SendGrid: payment failed, retry scheduled, final failure.", gitlab: "MR !140", progress: 100 },
-      { id: "LIN-208", title: "Webhook fan-out to CRM/Analytics", status: "blocked", priority: "high", assignee: "jun", gate: "product", cycle: "S12", dueDate: "2026-04-22", description: "Emit events: payment.failed, payment.succeeded, subscription.at_risk. Subscribers: Salesforce, Mixpanel.", gitlab: "MR !142", progress: 20, blockedBy: "Payments API v3 access — pending procurement approval" },
-      { id: "LIN-209", title: "Dunning rules configuration", status: "todo", priority: "medium", assignee: "jun", gate: "product", cycle: "S12", dueDate: "2026-04-25", description: "Admin UI for per-product dunning rules: max attempts, retry window, on-exhaustion action.", gitlab: "—", progress: 0 },
-      { id: "LIN-210", title: "Customer portal: subscription management", status: "todo", priority: "high", assignee: "lena", gate: "tech", cycle: "S13", dueDate: "2026-04-28", description: "View subscriptions, update payment method, pause/cancel. Self-serve flows.", gitlab: "—", progress: 0 },
-      { id: "LIN-211", title: "Handle partial refunds during retry", status: "todo", priority: "medium", assignee: "jun", gate: "tech", cycle: "S13", dueDate: "2026-04-30", description: "Edge case: detect refund webhook during active retry, pause state machine.", gitlab: "—", progress: 0 },
-      { id: "LIN-212", title: "Subscription cancellation mid-retry", status: "blocked", priority: "medium", assignee: "jun", gate: "tech", cycle: "S13", dueDate: "2026-05-02", description: "Handle subscription.cancelled while retry is active. Stop retry, refund partial period.", gitlab: "—", progress: 0, blockedBy: "Awaiting product spec from Maya" },
-      { id: "LIN-213", title: "Cascading failure handling", status: "todo", priority: "high", assignee: "jun", gate: "tech", cycle: "S13", dueDate: "2026-05-04", description: "Circuit breaker for downstream calls. Prevent retry storms during payment provider outages.", gitlab: "—", progress: 0 },
-      { id: "LIN-214", title: "Load testing & performance tuning", status: "todo", priority: "high", assignee: "mateo", gate: "tech", cycle: "S14", dueDate: "2026-05-08", description: "Test 1000s of concurrent retries. Tool: K6. Target: P99 < 500ms.", gitlab: "—", progress: 0 },
-      { id: "LIN-215", title: "E2E tests for full billing flow", status: "todo", priority: "high", assignee: "lena", gate: "tech", cycle: "S14", dueDate: "2026-05-10", description: "Integration tests via Playwright. Cover happy path, retries, refunds, cancellations.", gitlab: "—", progress: 0 },
-      { id: "LIN-216", title: "Integration with Payments API v3", status: "todo", priority: "critical", assignee: "jun", gate: "tech", cycle: "S14", dueDate: "2026-05-13", description: "Connect to new Stripe Billing API v3 endpoints. Migrate from v2.", gitlab: "—", progress: 0 },
-      { id: "LIN-217", title: "Production readiness review", status: "todo", priority: "high", assignee: "mateo", gate: "tech", cycle: "S14", dueDate: "2026-05-16", description: "Security review (OWASP Top 10), pen test, runbook, on-call rotation.", gitlab: "—", progress: 0 },
-    ];
+    // Filter LINEAR_TICKETS by projectId and map to TICKETS format
+    const allTickets = Object.values(window.LINEAR_TICKETS);
+    const projectTickets = allTickets.filter(t => t.projectId === projectId);
+    const TICKETS = projectTickets.map(t => ({
+      id: t.id,
+      title: t.title,
+      status: t.status,
+      priority: t.priority,
+      assignee: t.assignee,
+      gate: t.gate || "business",
+      cycle: t.sprintId,
+      dueDate: t.dueDate || t.created,
+      description: t.description,
+      gitlab: t.gitlabIssue || "—",
+      progress: t.progress || 0,
+      blockedBy: t.blockedBy
+    }));
 
     // --- Helpers ---
     const TODAY = new Date("2026-05-01");
@@ -197,7 +195,10 @@
                         }}
                       >
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                          <div style={{ fontSize: "13px", fontWeight: 600 }}>{cycle.name}</div>
+                          <div>
+                            <div style={{ fontSize: "13px", fontWeight: 600 }}>{cycle.name}</div>
+                            <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", marginTop: "2px" }}>{PROJECT.id} · {PROJECT.title}</div>
+                          </div>
                           <div style={{ fontSize: "12px", fontWeight: 700, color: active ? "var(--alps-primary)" : "var(--alps-text)" }}>{pct}%</div>
                         </div>
                         <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontFamily: "monospace" }}>{cycle.startDate} → {cycle.endDate}</div>
@@ -318,6 +319,10 @@
     }
 
     function DetailPanel({ ticket: t, onClose }) {
+      const [isEditing, setIsEditing] = useState(false);
+      const [editedTicket, setEditedTicket] = useState(null);
+      const [errors, setErrors] = useState({});
+      
       const cycleName = CYCLES.find(c => c.id === t.cycle)?.name || t.cycle;
       const overdue = isOverdue(t);
       const Field = ({ label, children }) => (
@@ -326,71 +331,291 @@
           <div>{children}</div>
         </div>
       );
+      
+      const validateTicket = (ticket) => {
+        const newErrors = {};
+        
+        // Title validation
+        if (!ticket.title.trim()) {
+          newErrors.title = "Title is required";
+        }
+        
+        // Status validation
+        if (!["todo", "in_progress", "blocked", "done"].includes(ticket.status)) {
+          newErrors.status = "Invalid status";
+        }
+        
+        // Priority validation
+        if (!["low", "medium", "high", "critical"].includes(ticket.priority)) {
+          newErrors.priority = "Invalid priority";
+        }
+        
+        // Due date validation
+        if (ticket.dueDate && isNaN(new Date(ticket.dueDate).getTime())) {
+          newErrors.dueDate = "Invalid date format";
+        }
+        
+        return newErrors;
+      };
+      
+      const handleSave = () => {
+        // Validation
+        const validationErrors = validateTicket(editedTicket);
+        setErrors(validationErrors);
+        
+        if (Object.keys(validationErrors).length > 0) {
+          return; // Don't save if there are validation errors
+        }
+        
+        // Update LINEAR_TICKETS in memory
+        const ticketKey = editedTicket.id;
+        if (window.LINEAR_TICKETS[ticketKey]) {
+          window.LINEAR_TICKETS[ticketKey] = {
+            ...window.LINEAR_TICKETS[ticketKey],
+            title: editedTicket.title,
+            description: editedTicket.description,
+            status: editedTicket.status,
+            priority: editedTicket.priority,
+            assignee: editedTicket.assignee,
+            dueDate: editedTicket.dueDate
+          };
+        }
+        
+        // Update local TICKETS array
+        const ticketIndex = TICKETS.findIndex(t => t.id === editedTicket.id);
+        if (ticketIndex !== -1) {
+          TICKETS[ticketIndex] = { ...TICKETS[ticketIndex], ...editedTicket };
+        }
+        
+        // Exit edit mode and refresh UI
+        setIsEditing(false);
+        setErrors({});
+        onClose();
+        // Note: In a real app, we'd trigger a re-render here
+      };
+      
+      const handleCancel = () => {
+        setIsEditing(false);
+        setEditedTicket(null);
+        setErrors({});
+      };
+      
+      const displayTicket = isEditing ? editedTicket : t;
+      const hasErrors = Object.keys(errors).length > 0;
+      
       return (
         <div style={{ position: "sticky", top: "16px", background: "var(--alps-bg-alt)", border: "1px solid var(--alps-border)", borderRadius: "8px", padding: "18px", display: "grid", gap: "16px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontFamily: "monospace", fontWeight: 600, marginBottom: "4px" }}>{t.id}</div>
-              <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--alps-text)", lineHeight: 1.35 }}>{t.title}</div>
+              <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontFamily: "monospace", fontWeight: 600, marginBottom: "4px" }}>{displayTicket.id}</div>
+              {isEditing ? (
+                <div>
+                  <input
+                    type="text"
+                    value={editedTicket.title}
+                    onChange={(e) => {
+                      setEditedTicket({ ...editedTicket, title: e.target.value });
+                      // Clear error on change
+                      if (errors.title) {
+                        const newErrors = { ...errors };
+                        delete newErrors.title;
+                        setErrors(newErrors);
+                      }
+                    }}
+                    style={{ fontSize: "14px", fontWeight: 600, color: "var(--alps-text)", lineHeight: 1.35, width: "100%", background: "var(--alps-bg)", border: `1px solid ${errors.title ? "var(--alps-danger)" : "var(--alps-border)"}`, borderRadius: "4px", padding: "6px 8px", fontFamily: "var(--font-sans)" }}
+                  />
+                  {errors.title && (
+                    <div style={{ fontSize: "10px", color: "var(--alps-danger)", marginTop: "4px", fontWeight: 600 }}>{errors.title}</div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--alps-text)", lineHeight: 1.35 }}>{displayTicket.title}</div>
+              )}
             </div>
-            <button onClick={onClose} style={{ background: "transparent", border: "none", color: "var(--alps-text-muted)", fontSize: "16px", cursor: "pointer", padding: "0 4px" }}>✕</button>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              {!isEditing && (
+                <button
+                  onClick={() => { setIsEditing(true); setEditedTicket({...t}); }}
+                  style={{ padding: "4px 10px", background: "var(--alps-primary)", color: "white", border: "none", borderRadius: "3px", cursor: "pointer", fontSize: "11px", fontWeight: 600 }}
+                >
+                  Edit
+                </button>
+              )}
+              {isEditing && (
+                <>
+                  <button
+                    onClick={handleSave}
+                    disabled={hasErrors}
+                    style={{ padding: "4px 10px", background: hasErrors ? "var(--alps-text-muted)" : "var(--alps-success)", color: "white", border: "none", borderRadius: "3px", cursor: hasErrors ? "not-allowed" : "pointer", fontSize: "11px", fontWeight: 600, opacity: hasErrors ? 0.5 : 1 }}
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    style={{ padding: "4px 10px", background: "transparent", color: "var(--alps-text-muted)", border: "1px solid var(--alps-border)", borderRadius: "3px", cursor: "pointer", fontSize: "11px", fontWeight: 600 }}
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+              <button onClick={onClose} style={{ background: "transparent", border: "none", color: "var(--alps-text-muted)", fontSize: "16px", cursor: "pointer", padding: "0 4px" }}>✕</button>
+            </div>
           </div>
 
-          {t.status === "blocked" && (
+          {displayTicket.status === "blocked" && (
             <div style={{ padding: "10px 12px", background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.3)", borderRadius: "6px", display: "flex", gap: "8px", alignItems: "flex-start" }}>
               <div style={{ color: "var(--alps-danger)", fontSize: "12px" }}>⚠</div>
               <div>
                 <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--alps-danger)", marginBottom: "2px" }}>Blocked</div>
-                <div style={{ fontSize: "11px", color: "var(--alps-text)", lineHeight: 1.4 }}>{t.blockedBy || "Awaiting upstream dependency"}</div>
+                <div style={{ fontSize: "11px", color: "var(--alps-text)", lineHeight: 1.4 }}>{displayTicket.blockedBy || "Awaiting upstream dependency"}</div>
               </div>
             </div>
           )}
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 16px" }}>
-            <Field label="Status"><div style={{ fontSize: "12px", fontWeight: 600, color: statusColor(t.status), textTransform: "capitalize" }}>{t.status.replace("_", " ")}</div></Field>
-            <Field label="Priority"><div style={{ fontSize: "12px", fontWeight: 600, color: priorityColor(t.priority), textTransform: "capitalize" }}>{t.priority}</div></Field>
+            <Field label="Status">
+              {isEditing ? (
+                <div>
+                  <select
+                    value={editedTicket.status}
+                    onChange={(e) => {
+                      setEditedTicket({ ...editedTicket, status: e.target.value });
+                      // Clear error on change
+                      if (errors.status) {
+                        const newErrors = { ...errors };
+                        delete newErrors.status;
+                        setErrors(newErrors);
+                      }
+                    }}
+                    style={{ fontSize: "12px", fontWeight: 600, padding: "4px 8px", background: "var(--alps-bg)", border: `1px solid ${errors.status ? "var(--alps-danger)" : "var(--alps-border)"}`, borderRadius: "3px", color: "var(--alps-text)", cursor: "pointer", fontFamily: "var(--font-sans)" }}
+                  >
+                    <option value="todo">Todo</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="blocked">Blocked</option>
+                    <option value="done">Done</option>
+                  </select>
+                  {errors.status && (
+                    <div style={{ fontSize: "10px", color: "var(--alps-danger)", marginTop: "4px", fontWeight: 600 }}>{errors.status}</div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ fontSize: "12px", fontWeight: 600, color: statusColor(displayTicket.status), textTransform: "capitalize" }}>{displayTicket.status.replace("_", " ")}</div>
+              )}
+            </Field>
+            <Field label="Priority">
+              {isEditing ? (
+                <div>
+                  <select
+                    value={editedTicket.priority}
+                    onChange={(e) => {
+                      setEditedTicket({ ...editedTicket, priority: e.target.value });
+                      // Clear error on change
+                      if (errors.priority) {
+                        const newErrors = { ...errors };
+                        delete newErrors.priority;
+                        setErrors(newErrors);
+                      }
+                    }}
+                    style={{ fontSize: "12px", fontWeight: 600, padding: "4px 8px", background: "var(--alps-bg)", border: `1px solid ${errors.priority ? "var(--alps-danger)" : "var(--alps-border)"}`, borderRadius: "3px", color: "var(--alps-text)", cursor: "pointer", fontFamily: "var(--font-sans)" }}
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                  {errors.priority && (
+                    <div style={{ fontSize: "10px", color: "var(--alps-danger)", marginTop: "4px", fontWeight: 600 }}>{errors.priority}</div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ fontSize: "12px", fontWeight: 600, color: priorityColor(displayTicket.priority), textTransform: "capitalize" }}>{displayTicket.priority}</div>
+              )}
+            </Field>
             <Field label="Assignee">
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <Avatar person={t.assignee} size={18} />
-                <div style={{ fontSize: "11px" }}>{PEOPLE[t.assignee]?.fullName}</div>
-              </div>
+              {isEditing ? (
+                <select
+                  value={editedTicket.assignee}
+                  onChange={(e) => setEditedTicket({ ...editedTicket, assignee: e.target.value })}
+                  style={{ fontSize: "11px", padding: "4px 8px", background: "var(--alps-bg)", border: "1px solid var(--alps-border)", borderRadius: "3px", color: "var(--alps-text)", cursor: "pointer", fontFamily: "var(--font-sans)", width: "100%" }}
+                >
+                  {Object.keys(PEOPLE).map(k => (
+                    <option key={k} value={k}>{PEOPLE[k].fullName}</option>
+                  ))}
+                </select>
+              ) : (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <Avatar person={displayTicket.assignee} size={18} />
+                  <div style={{ fontSize: "11px" }}>{PEOPLE[displayTicket.assignee]?.fullName}</div>
+                </div>
+              )}
             </Field>
             <Field label="Due Date">
-              <div style={{ fontSize: "11px", fontFamily: "monospace", color: overdue ? "#dc2626" : "var(--alps-text)", fontWeight: overdue ? 600 : 400 }}>
-                {overdue && "⚠ "}{t.dueDate || "—"}
-              </div>
+              {isEditing ? (
+                <div>
+                  <input
+                    type="date"
+                    value={editedTicket.dueDate || ""}
+                    onChange={(e) => {
+                      setEditedTicket({ ...editedTicket, dueDate: e.target.value });
+                      // Clear error on change
+                      if (errors.dueDate) {
+                        const newErrors = { ...errors };
+                        delete newErrors.dueDate;
+                        setErrors(newErrors);
+                      }
+                    }}
+                    style={{ fontSize: "11px", fontFamily: "monospace", padding: "4px 8px", background: "var(--alps-bg)", border: `1px solid ${errors.dueDate ? "var(--alps-danger)" : "var(--alps-border)"}`, borderRadius: "3px", color: "var(--alps-text)", fontFamily: "var(--font-sans)", width: "100%" }}
+                  />
+                  {errors.dueDate && (
+                    <div style={{ fontSize: "10px", color: "var(--alps-danger)", marginTop: "4px", fontWeight: 600 }}>{errors.dueDate}</div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ fontSize: "11px", fontFamily: "monospace", color: overdue ? "#dc2626" : "var(--alps-text)", fontWeight: overdue ? 600 : 400 }}>
+                  {overdue && "⚠ "}{displayTicket.dueDate || "—"}
+                </div>
+              )}
             </Field>
-            <Field label="Linked Gate"><div style={{ fontSize: "11px", fontWeight: 600, color: "var(--alps-text)", textTransform: "capitalize", padding: "2px 8px", background: "var(--alps-bg)", borderRadius: "3px", display: "inline-block" }}>{t.gate}</div></Field>
+            <Field label="Linked Gate"><div style={{ fontSize: "11px", fontWeight: 600, color: "var(--alps-text)", textTransform: "capitalize", padding: "2px 8px", background: "var(--alps-bg)", borderRadius: "3px", display: "inline-block" }}>{displayTicket.gate}</div></Field>
             <Field label="Cycle"><div style={{ fontSize: "11px" }}>{cycleName}</div></Field>
+            <Field label="Project"><div style={{ fontSize: "11px", fontWeight: 600, color: "var(--alps-text)" }}>{PROJECT.id} · {PROJECT.title}</div></Field>
           </div>
 
           <Field label="Description">
-            <div style={{ fontSize: "12px", color: "var(--alps-text)", lineHeight: 1.5, padding: "10px 12px", background: "var(--alps-bg)", borderRadius: "4px" }}>{t.description}</div>
+            {isEditing ? (
+              <textarea
+                value={editedTicket.description}
+                onChange={(e) => setEditedTicket({ ...editedTicket, description: e.target.value })}
+                style={{ fontSize: "12px", color: "var(--alps-text)", lineHeight: 1.5, padding: "10px 12px", background: "var(--alps-bg)", borderRadius: "4px", border: "1px solid var(--alps-border)", fontFamily: "var(--font-sans)", width: "100%", minHeight: "80px", resize: "vertical" }}
+              />
+            ) : (
+              <div style={{ fontSize: "12px", color: "var(--alps-text)", lineHeight: 1.5, padding: "10px 12px", background: "var(--alps-bg)", borderRadius: "4px" }}>{displayTicket.description}</div>
+            )}
           </Field>
 
           <Field label="Git Activity">
             <div style={{ display: "grid", gap: "6px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 10px", background: "var(--alps-bg)", borderRadius: "4px", fontSize: "11px" }}>
-                <span style={{ fontFamily: "monospace", color: "var(--alps-primary)", fontWeight: 600 }}>{t.gitlab}</span>
-                <span style={{ color: "var(--alps-text-muted)", flex: 1 }}>{t.status === "done" ? "merged" : t.status === "in_progress" ? "open · 2 commits ahead" : t.gitlab === "—" ? "no branch yet" : "draft"}</span>
+                <span style={{ fontFamily: "monospace", color: "var(--alps-primary)", fontWeight: 600 }}>{displayTicket.gitlab}</span>
+                <span style={{ color: "var(--alps-text-muted)", flex: 1 }}>{displayTicket.status === "done" ? "merged" : displayTicket.status === "in_progress" ? "open · 2 commits ahead" : displayTicket.gitlab === "—" ? "no branch yet" : "draft"}</span>
               </div>
-              {t.progress > 0 && (
+              {displayTicket.progress > 0 && (
                 <div style={{ padding: "8px 10px", background: "var(--alps-bg)", borderRadius: "4px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "var(--alps-text-muted)", marginBottom: "4px" }}>
-                    <span>Progress</span><span style={{ fontWeight: 600, color: "var(--alps-text)" }}>{t.progress}%</span>
+                    <span>Progress</span><span style={{ fontWeight: 600, color: "var(--alps-text)" }}>{displayTicket.progress}%</span>
                   </div>
                   <div style={{ height: "4px", background: "var(--alps-bg-alt)", borderRadius: "2px", overflow: "hidden" }}>
-                    <div style={{ height: "100%", background: statusColor(t.status), width: `${t.progress}%` }}></div>
+                    <div style={{ height: "100%", background: statusColor(displayTicket.status), width: `${displayTicket.progress}%` }}></div>
                   </div>
                 </div>
               )}
             </div>
           </Field>
 
-          {t.blockedBy && (
+          {displayTicket.blockedBy && (
             <Field label="Dependencies">
               <div style={{ fontSize: "11px", padding: "8px 10px", background: "var(--alps-bg)", borderRadius: "4px" }}>
-                Blocked by: <span style={{ color: "var(--alps-danger)", fontWeight: 600 }}>{t.blockedBy}</span>
+                Blocked by: <span style={{ color: "var(--alps-danger)", fontWeight: 600 }}>{displayTicket.blockedBy}</span>
               </div>
             </Field>
           )}

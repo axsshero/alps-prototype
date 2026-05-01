@@ -65,7 +65,7 @@ const PROJECT = {
       ],
     },
   },
-  blockers: 0,
+  blockers: 1,
   dependencies: ["Payments API v3", "Customer 360"],
   tags: ["billing", "platform", "Q3"],
   changeLog: [
@@ -73,8 +73,6 @@ const PROJECT = {
     { gate: "product", date: "2026-04-20", action: "criteria_updated", by: "rina", note: "Added webhook requirement based on ops feedback" },
     { gate: "product", date: "2026-04-15", action: "started", by: "rina", note: "Design review passed, implementation begins" },
   ],
-  ticketIds: ["LIN-201", "LIN-202", "LIN-203", "LIN-204", "LIN-205", "LIN-206", "LIN-207", "LIN-208", "LIN-209", "LIN-210", "LIN-211", "LIN-212", "LIN-213", "LIN-214", "LIN-215", "LIN-216", "LIN-217"],
-  sprintIds: ["sprint-1", "sprint-2", "sprint-3", "sprint-4"],
   completedTickets: 5,
   totalTickets: 17,
 };
@@ -89,7 +87,6 @@ const SPRINTS = [
     status: "completed",
     startDate: "2026-04-01",
     endDate: "2026-04-14",
-    tickets: ["LIN-201", "LIN-202", "LIN-203", "LIN-204"],
     completedTickets: 4,
     totalTickets: 4,
   },
@@ -101,7 +98,6 @@ const SPRINTS = [
     status: "in_progress",
     startDate: "2026-04-15",
     endDate: "2026-04-28",
-    tickets: ["LIN-205", "LIN-206", "LIN-207", "LIN-208", "LIN-209", "LIN-210"],
     completedTickets: 3,
     totalTickets: 6,
   },
@@ -113,7 +109,6 @@ const SPRINTS = [
     status: "planned",
     startDate: "2026-05-01",
     endDate: "2026-05-14",
-    tickets: ["LIN-211", "LIN-212", "LIN-213", "LIN-214"],
     completedTickets: 0,
     totalTickets: 4,
   },
@@ -125,7 +120,6 @@ const SPRINTS = [
     status: "planned",
     startDate: "2026-05-15",
     endDate: "2026-05-28",
-    tickets: ["LIN-215", "LIN-216", "LIN-217"],
     completedTickets: 0,
     totalTickets: 3,
   },
@@ -137,7 +131,6 @@ const SPRINTS = [
     status: "in_progress",
     startDate: "2026-07-01",
     endDate: "2026-07-14",
-    tickets: ["LIN-301", "LIN-302", "LIN-303"],
     completedTickets: 1,
     totalTickets: 3,
   },
@@ -146,7 +139,7 @@ const SPRINTS = [
 // Linear Tickets (referenced from GitLab)
 const LINEAR_TICKETS = {
   "LIN-201": { 
-    id: "LIN-201", projectId: "ALPS-218", title: "Design payment retry state machine", status: "done", assignee: "rina", priority: "high", created: "2026-03-28", gitlabIssue: "#542", progress: 100, description: "Define state transitions for payment retry logic",
+    id: "LIN-201", projectId: "ALPS-218", sprintId: "sprint-1", title: "Design payment retry state machine", status: "done", assignee: "rina", priority: "high", created: "2026-03-28", gitlabIssue: "#542", progress: 100, description: "Define state transitions for payment retry logic",
     techSpecs: [
       { label: "Stack", value: "TypeScript + State Machine XState library" },
       { label: "Database", value: "PostgreSQL with retry_states table" },
@@ -156,7 +149,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["State diagram documented", "XState machine implemented", "All transitions tested", "Design review approved"],
   },
   "LIN-202": { 
-    id: "LIN-202", projectId: "ALPS-218", title: "Set up database schema for billing", status: "done", assignee: "jun", priority: "high", created: "2026-03-29", gitlabIssue: "#543", progress: 100, description: "Create tables for invoices, transactions, retry logs",
+    id: "LIN-202", projectId: "ALPS-218", sprintId: "sprint-1", title: "Set up database schema for billing", status: "done", assignee: "jun", priority: "high", created: "2026-03-29", gitlabIssue: "#543", progress: 100, description: "Create tables for invoices, transactions, retry logs",
     techSpecs: [
       { label: "Database", value: "PostgreSQL 14+" },
       { label: "Tables", value: "invoices, transactions, retry_attempts, dunning_logs" },
@@ -166,7 +159,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["All tables created", "Indexes optimized", "Migrations tested", "Data model reviewed by tech lead"],
   },
   "LIN-203": { 
-    id: "LIN-203", projectId: "ALPS-218", title: "Create billing service skeleton", status: "done", assignee: "jun", priority: "high", created: "2026-04-01", gitlabIssue: "#544", progress: 100, description: "Set up API endpoints and service structure",
+    id: "LIN-203", projectId: "ALPS-218", sprintId: "sprint-1", title: "Create billing service skeleton", status: "done", assignee: "jun", priority: "high", created: "2026-04-01", gitlabIssue: "#544", progress: 100, description: "Set up API endpoints and service structure",
     techSpecs: [
       { label: "Framework", value: "FastAPI + Python 3.11" },
       { label: "Base Path", value: "/api/v1/billing" },
@@ -176,7 +169,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["Service scaffolding complete", "Auth middleware integrated", "Logging configured", "Health check endpoint working"],
   },
   "LIN-204": { 
-    id: "LIN-204", title: "Auth & permissions for billing admin", status: "done", assignee: "lena", priority: "medium", created: "2026-04-05", gitlabIssue: "#545", progress: 100, description: "RBAC for billing dashboard access",
+    id: "LIN-204", projectId: "ALPS-218", sprintId: "sprint-1", title: "Auth & permissions for billing admin", status: "done", assignee: "lena", priority: "medium", created: "2026-04-05", gitlabIssue: "#545", progress: 100, description: "RBAC for billing dashboard access",
     techSpecs: [
       { label: "Auth", value: "OAuth 2.0 with roles (admin, viewer, editor)" },
       { label: "Permissions", value: "view_invoices, edit_dunning_rules, export_reports" },
@@ -185,7 +178,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["RBAC implemented", "All roles tested", "Audit logging working", "Permissions documented"],
   },
   "LIN-205": { 
-    id: "LIN-205", projectId: "ALPS-218", title: "Implement retry logic with exponential backoff", status: "in_progress", assignee: "jun", priority: "high", created: "2026-04-10", gitlabIssue: "#546", progress: 75, description: "1s, 2s, 4s, 8s, 16s max with jitter",
+    id: "LIN-205", projectId: "ALPS-218", sprintId: "sprint-2", title: "Implement retry logic with exponential backoff", status: "in_progress", assignee: "jun", priority: "high", created: "2026-04-10", gitlabIssue: "#546", progress: 75, description: "1s, 2s, 4s, 8s, 16s max with jitter",
     techSpecs: [
       { label: "Algorithm", value: "Exponential backoff: 2^attempt + jitter (±10%)" },
       { label: "Max Wait", value: "16 seconds between retries" },
@@ -195,7 +188,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["Backoff calculation correct", "Jitter applied", "Max attempts enforced", "Timing verified in tests"],
   },
   "LIN-206": { 
-    id: "LIN-206", projectId: "ALPS-218", title: "Build billing dashboard UI", status: "in_progress", assignee: "lena", priority: "high", created: "2026-04-11", gitlabIssue: "#547", progress: 60, description: "Invoice list, detail view, export capabilities",
+    id: "LIN-206", projectId: "ALPS-218", sprintId: "sprint-2", title: "Build billing dashboard UI", status: "in_progress", assignee: "lena", priority: "high", created: "2026-04-11", gitlabIssue: "#547", progress: 60, description: "Invoice list, detail view, export capabilities",
     techSpecs: [
       { label: "Frontend", value: "React 18 + TypeScript" },
       { label: "State", value: "React Query for server state, Zustand for UI state" },
@@ -205,7 +198,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["Invoice list with pagination (50 items/page)", "Sort by date/amount/status", "Export to CSV/PDF", "Responsive on mobile", "Loading & error states"],
   },
   "LIN-207": { 
-    id: "LIN-207", projectId: "ALPS-218", title: "Email notifications for failed payments", status: "done", assignee: "lena", priority: "medium", created: "2026-04-12", gitlabIssue: "#548", progress: 100, description: "Transactional emails with retry count",
+    id: "LIN-207", projectId: "ALPS-218", sprintId: "sprint-2", title: "Email notifications for failed payments", status: "done", assignee: "lena", priority: "medium", created: "2026-04-12", gitlabIssue: "#548", progress: 100, description: "Transactional emails with retry count",
     techSpecs: [
       { label: "Service", value: "SendGrid / Brevo" },
       { label: "Templates", value: "Handlebars + MJML for responsive emails" },
@@ -215,7 +208,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["Email templates created", "Variables passed correctly", "Tracking enabled", "Unsubscribe compliant"],
   },
   "LIN-208": { 
-    id: "LIN-208", projectId: "ALPS-218", title: "Webhook fan-out to CRM/Analytics", status: "blocked", assignee: "jun", priority: "high", created: "2026-04-14", gitlabIssue: "#549", progress: 20, blockedBy: "Payments API v3 delay", description: "Emit events for downstream systems",
+    id: "LIN-208", projectId: "ALPS-218", sprintId: "sprint-2", title: "Webhook fan-out to CRM/Analytics", status: "blocked", assignee: "jun", priority: "high", created: "2026-04-14", gitlabIssue: "#549", progress: 20, blockedBy: "Payments API v3 delay", description: "Emit events for downstream systems",
     techSpecs: [
       { label: "Events", value: "payment.failed, payment.succeeded, subscription.at_risk" },
       { label: "Delivery", value: "HTTP webhooks with HMAC-SHA256 signature" },
@@ -225,7 +218,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["Webhook endpoints created", "Signatures verified", "Retry logic tested", "Consumer integrations working"],
   },
   "LIN-209": { 
-    id: "LIN-209", projectId: "ALPS-218", title: "Dunning rules configuration", status: "todo", assignee: "jun", priority: "medium", created: "2026-04-18", gitlabIssue: "#550", progress: 0, description: "Admin UI for per-product dunning policies",
+    id: "LIN-209", projectId: "ALPS-218", sprintId: "sprint-2", title: "Dunning rules configuration", status: "todo", assignee: "jun", priority: "medium", created: "2026-04-18", gitlabIssue: "#550", progress: 0, description: "Admin UI for per-product dunning policies",
     techSpecs: [
       { label: "Data Model", value: "dunning_rules with max_attempts, retry_window, on_exhaustion" },
       { label: "UI", value: "React form builder with rule templates" },
@@ -235,7 +228,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["Rules CRUD API", "Admin UI with form validation", "Rule templates for common scenarios", "Preview/dry-run feature", "Audit trail of changes"],
   },
   "LIN-210": { 
-    id: "LIN-210", title: "Customer portal: subscription management", status: "todo", assignee: "lena", priority: "high", created: "2026-04-20", gitlabIssue: "#551", progress: 0, description: "View subscriptions, update payment methods, cancel",
+    id: "LIN-210", projectId: "ALPS-218", sprintId: "sprint-2", title: "Customer portal: subscription management", status: "todo", assignee: "lena", priority: "high", created: "2026-04-20", gitlabIssue: "#551", progress: 0, description: "View subscriptions, update payment methods, cancel",
     techSpecs: [
       { label: "Frontend", value: "Next.js 14 + TypeScript" },
       { label: "Auth", value: "JWT from main auth service" },
@@ -245,7 +238,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["List active subscriptions", "Update payment method securely", "View recovery status timeline", "Cancel subscription", "Mobile responsive", "Loading & error states"],
   },
   "LIN-211": { 
-    id: "LIN-211", title: "Handle partial refunds during retry", status: "todo", assignee: "jun", priority: "medium", created: "2026-04-22", gitlabIssue: "#552", progress: 0, description: "Edge case: refund issued mid-retry cycle",
+    id: "LIN-211", projectId: "ALPS-218", sprintId: "sprint-3", title: "Handle partial refunds during retry", status: "todo", assignee: "jun", priority: "medium", created: "2026-04-22", gitlabIssue: "#552", progress: 0, description: "Edge case: refund issued mid-retry cycle",
     techSpecs: [
       { label: "Logic", value: "Detect refund webhook, pause retry state machine" },
       { label: "Reconciliation", value: "Compare invoice vs actual transaction amounts" },
@@ -254,7 +247,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["Refund detection working", "Retry paused correctly", "Reconciliation tests pass", "Event emission verified"],
   },
   "LIN-212": { 
-    id: "LIN-212", title: "Subscription cancellation mid-retry", status: "todo", assignee: "jun", priority: "medium", created: "2026-04-23", gitlabIssue: "#553", progress: 0, description: "Handle state when user cancels during retry",
+    id: "LIN-212", projectId: "ALPS-218", sprintId: "sprint-3", title: "Subscription cancellation mid-retry", status: "todo", assignee: "jun", priority: "medium", created: "2026-04-23", gitlabIssue: "#553", progress: 0, description: "Handle state when user cancels during retry",
     techSpecs: [
       { label: "Trigger", value: "Listen to subscription.cancelled event" },
       { label: "Action", value: "Transition state machine to 'cancelled', skip pending retries" },
@@ -263,7 +256,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["Cancellation detected", "Retries halted", "State cleaned up", "Tests verify edge cases"],
   },
   "LIN-213": { 
-    id: "LIN-213", title: "Cascading failure handling", status: "todo", assignee: "jun", priority: "high", created: "2026-04-24", gitlabIssue: "#554", progress: 0, description: "Prevent one failure from cascading to other systems",
+    id: "LIN-213", projectId: "ALPS-218", sprintId: "sprint-3", title: "Cascading failure handling", status: "todo", assignee: "jun", priority: "high", created: "2026-04-24", gitlabIssue: "#554", progress: 0, description: "Prevent one failure from cascading to other systems",
     techSpecs: [
       { label: "Pattern", value: "Circuit breaker for downstream calls" },
       { label: "Fallback", value: "Graceful degradation, queue for async retry" },
@@ -273,7 +266,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["Circuit breaker implemented", "Timeouts enforced", "Fallbacks working", "Monitoring alerts firing"],
   },
   "LIN-214": { 
-    id: "LIN-214", title: "Load testing & performance tuning", status: "todo", assignee: "mateo", priority: "high", created: "2026-04-25", gitlabIssue: "#555", progress: 0, description: "Test 1000s of concurrent retries",
+    id: "LIN-214", projectId: "ALPS-218", sprintId: "sprint-3", title: "Load testing & performance tuning", status: "todo", assignee: "mateo", priority: "high", created: "2026-04-25", gitlabIssue: "#555", progress: 0, description: "Test 1000s of concurrent retries",
     techSpecs: [
       { label: "Tool", value: "Locust / K6 for load testing" },
       { label: "Scenario", value: "10k concurrent retries, 100 req/sec sustained" },
@@ -283,7 +276,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["Load test suite created", "Baseline metrics recorded", "Bottlenecks identified", "Performance targets met"],
   },
   "LIN-215": { 
-    id: "LIN-215", title: "E2E tests for full billing flow", status: "todo", assignee: "lena", priority: "high", created: "2026-04-26", gitlabIssue: "#556", progress: 0, description: "Integration tests across all components",
+    id: "LIN-215", projectId: "ALPS-218", sprintId: "sprint-4", title: "E2E tests for full billing flow", status: "todo", assignee: "lena", priority: "high", created: "2026-04-26", gitlabIssue: "#556", progress: 0, description: "Integration tests across all components",
     techSpecs: [
       { label: "Framework", value: "Playwright / Cypress for browser automation" },
       { label: "Coverage", value: "Happy path + 5 failure scenarios" },
@@ -293,7 +286,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["E2E tests for 5+ scenarios", "Coverage > 80%", "CI integration", "Runs under 10 minutes"],
   },
   "LIN-216": { 
-    id: "LIN-216", title: "Integration with Payments API v3", status: "todo", assignee: "jun", priority: "critical", created: "2026-04-27", gitlabIssue: "#557", progress: 0, description: "Connect to new payments provider API",
+    id: "LIN-216", projectId: "ALPS-218", sprintId: "sprint-4", title: "Integration with Payments API v3", status: "todo", assignee: "jun", priority: "critical", created: "2026-04-27", gitlabIssue: "#557", progress: 0, description: "Connect to new payments provider API",
     techSpecs: [
       { label: "Provider", value: "Stripe Billing API v3 / Braintree" },
       { label: "SDK", value: "Official provider SDK with type definitions" },
@@ -303,7 +296,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["SDK integrated", "All required methods working", "Idempotency tested", "Error handling verified", "Secrets managed securely"],
   },
   "LIN-217": { 
-    id: "LIN-217", title: "Production readiness review", status: "todo", assignee: "mateo", priority: "high", created: "2026-04-28", gitlabIssue: "#558", progress: 0, description: "Security, performance, monitoring audit",
+    id: "LIN-217", projectId: "ALPS-218", sprintId: "sprint-4", title: "Production readiness review", status: "todo", assignee: "mateo", priority: "high", created: "2026-04-28", gitlabIssue: "#558", progress: 0, description: "Security, performance, monitoring audit",
     techSpecs: [
       { label: "Security", value: "OWASP Top 10 review, penetration test" },
       { label: "Monitoring", value: "Datadog dashboards, PagerDuty alerts" },
@@ -314,7 +307,7 @@ const LINEAR_TICKETS = {
   },
   // ALPS-301 tickets
   "LIN-301": {
-    id: "LIN-301", title: "Migrate payment summary HTML to React components", status: "done",
+    id: "LIN-301", projectId: "ALPS-301", sprintId: "sprint-5", title: "Migrate payment summary HTML to React components", status: "done",
     assignee: "lena", priority: "high", created: "2026-05-02", gitlabIssue: "#601", progress: 100,
     description: "Replace the legacy PHP-rendered payment summary template with a React component tree. Maintain visual parity with the existing layout.",
     techSpecs: [
@@ -326,7 +319,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["Visual parity with PHP output (< 2% pixel diff)", "All existing props supported", "Storybook stories published", "Accessibility audit passed (WCAG 2.1 AA)"],
   },
   "LIN-302": {
-    id: "LIN-302", title: "Build API endpoints replacing PHP payment logic", status: "in_progress",
+    id: "LIN-302", projectId: "ALPS-301", sprintId: "sprint-5", title: "Build API endpoints replacing PHP payment logic", status: "in_progress",
     assignee: "jun", priority: "high", created: "2026-05-05", gitlabIssue: "#602", progress: 40,
     blockedBy: "Payments API v3 access pending",
     description: "Create REST API endpoints that replicate the business logic currently embedded in PHP. Required before the React component can go live.",
@@ -339,7 +332,7 @@ const LINEAR_TICKETS = {
     acceptanceCriteria: ["All PHP business rules replicated", "Response time < 200ms p99", "Error codes match PHP responses for backward compat", "Integration tests cover happy path + 4 error scenarios"],
   },
   "LIN-303": {
-    id: "LIN-303", title: "Integrate A/B testing framework for checkout flows", status: "todo",
+    id: "LIN-303", projectId: "ALPS-301", sprintId: "sprint-5", title: "Integrate A/B testing framework for checkout flows", status: "todo",
     assignee: "lena", priority: "medium", created: "2026-05-08", gitlabIssue: "#603", progress: 0,
     description: "Wire up the A/B testing SDK so product can run experiments on the new React payment summary without code deploys.",
     techSpecs: [
@@ -352,7 +345,7 @@ const LINEAR_TICKETS = {
   },
   // ALPS-302 tickets
   "LIN-401": {
-    id: "LIN-401", title: "Set up Flutter project structure for Favourites", status: "todo",
+    id: "LIN-401", projectId: "ALPS-302", sprintId: null, title: "Set up Flutter project structure for Favourites", status: "todo",
     assignee: "jun", priority: "high", created: "2026-05-16", gitlabIssue: "#701", progress: 0,
     description: "Bootstrap the Flutter project with the agreed architecture: Riverpod for state management, Hive for local storage, and CI/CD pipeline for App Store and Play Store.",
     techSpecs: [
@@ -630,7 +623,7 @@ const ALPS_301 = {
       ],
     },
   },
-  blockers: 1,
+  blockers: 0,
   dependencies: ["Payments API v3", "Design System v2"],
   tags: ["payments", "refactor", "react"],
   changeLog: [
@@ -638,8 +631,6 @@ const ALPS_301 = {
     { gate: "product", date: "2026-05-10", action: "started", by: "rina", note: "Product gate review initiated" },
     { gate: "product", date: "2026-05-20", action: "criteria_updated", by: "rina", note: "Added express pay (Apple/Google Pay) to feature scope" },
   ],
-  ticketIds: ["LIN-301", "LIN-302", "LIN-303"],
-  sprintIds: ["sprint-5"],
   completedTickets: 1,
   totalTickets: 3,
 };
@@ -701,8 +692,6 @@ const ALPS_302 = {
     { gate: "business", date: "2026-05-16", action: "started", by: "rina", note: "Business gate review initiated" },
     { gate: "business", date: "2026-05-22", action: "criteria_updated", by: "sven", note: "Added mobile engagement baseline metrics from analytics" },
   ],
-  ticketIds: ["LIN-401"],
-  sprintIds: [],
   completedTickets: 0,
   totalTickets: 1,
 };

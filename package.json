@@ -1,0 +1,25 @@
+{
+  "name": "alps-project",
+  "version": "1.0.0",
+  "description": "ALPS (Agile Lifecycle & Project Steering) - React-based project visibility and management prototype",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:bug-exploration": "jest .kiro/specs/progress-html-data-integration/bug-condition-exploration.test.js"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jsdom": "^23.0.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "project/**/*.{js,jsx}",
+      "!project/**/*.test.{js,jsx}"
+    ]
+  }
+}

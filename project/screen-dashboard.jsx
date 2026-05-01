@@ -242,9 +242,8 @@ function DashboardScreen({ role, suggestions, onSuggestionUpdate, activeProjectI
   }, [activeProjectId]);
 
   // Filter tickets to only those belonging to the active project
-  const projectTicketIds = new Set(project.ticketIds || []);
   const projectTickets = Object.values(window.LINEAR_TICKETS).filter(
-    (t) => projectTicketIds.size > 0 ? projectTicketIds.has(t.id) : t.projectId === project.id
+    (t) => t.projectId === project.id
   );
   const totalTickets   = projectTickets.length;
   const doneTickets    = projectTickets.filter((t) => t.status === "done").length;
@@ -358,7 +357,7 @@ function DashboardScreen({ role, suggestions, onSuggestionUpdate, activeProjectI
                   <div><span style={{ color: "var(--alps-danger)" }}>●</span> {blockedTickets}</div>
                 </div>
                 <button
-                  onClick={() => window.open("Progress.html", "_blank")}
+                  onClick={() => window.open(`Progress.html?projectId=${project.id}`, "_blank")}
                   style={{
                     display: "flex", alignItems: "center", gap: "4px",
                     padding: "4px 10px", background: "transparent",

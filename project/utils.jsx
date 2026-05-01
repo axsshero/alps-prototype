@@ -66,8 +66,9 @@ function computeSprintHealth(sprint, today) {
     ? 0
     : (sprint.completedTickets / sprint.totalTickets) * 100;
 
-  const blockedCount = (sprint.tickets || []).filter(
-    id => window.LINEAR_TICKETS && window.LINEAR_TICKETS[id]?.status === "blocked"
+  // Count blocked tickets for this sprint using the new filter pattern
+  const blockedCount = Object.values(window.LINEAR_TICKETS || {}).filter(
+    t => t.sprintId === sprint.id && t.status === "blocked"
   ).length;
 
   const gap = elapsedPct - actualPct;
@@ -151,16 +152,14 @@ function computeWorkload(sprints, tickets, people) {
   // 1. Filter to active (in_progress) sprints only
   const activeSprints = sprints.filter(s => s.status === "in_progress");
 
-  // 2. Collect all ticket ids from active sprints
-  const ticketIds = activeSprints.reduce((acc, sprint) => {
-    (sprint.tickets || []).forEach(id => acc.push(id));
-    return acc;
-  }, []);
+  // 2. Collect all tickets from active sprints using the new filter pattern
+  const activeSprintIds = new Set(activeSprints.map(s => s.id));
+  const activeTickets = Object.values(tickets).filter(t => activeSprintIds.has(t.sprintId));
 
   // 3 & 4. Count tickets per assignee
   const countMap = {};
-  ticketIds.forEach(id => {
-    const assignee = tickets[id]?.assignee;
+  activeTickets.forEach(ticket => {
+    const assignee = ticket.assignee;
     if (assignee) {
       countMap[assignee] = (countMap[assignee] || 0) + 1;
     }

@@ -26,7 +26,7 @@ function Sprint_Health_Badge({ health }) {
   );
 }
 
-function Sprint_Card({ sprint, health, onViewProject }) {
+function Sprint_Card({ sprint, health, onViewProject, expanded, onToggleExpand }) {
   const completionPct = sprint.totalTickets === 0
     ? 0
     : Math.round((sprint.completedTickets / sprint.totalTickets) * 100);
@@ -42,6 +42,11 @@ function Sprint_Card({ sprint, health, onViewProject }) {
     ? window.PROJECTS.find(p => p.id === sprint.projectId)
     : null;
 
+  // Get tickets for this sprint
+  const sprintTickets = Object.values(window.LINEAR_TICKETS || {}).filter(t => t.sprintId === sprint.id);
+  const blockedTickets = sprintTickets.filter(t => t.status === "blocked");
+  const inProgressTickets = sprintTickets.filter(t => t.status === "in_progress");
+
   return (
     <div style={{
       padding: "14px 16px", background: "var(--alps-bg)",
@@ -50,7 +55,7 @@ function Sprint_Card({ sprint, health, onViewProject }) {
     }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0, flex: 1 }}>
           <span style={{ fontSize: "13px", fontWeight: 600, color: "var(--alps-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sprint.name}</span>
           <span style={{
             fontSize: "10px", fontWeight: 700, padding: "2px 6px", borderRadius: "3px", flexShrink: 0,
@@ -59,7 +64,25 @@ function Sprint_Card({ sprint, health, onViewProject }) {
             {sprint.status === "in_progress" ? "Active" : sprint.status === "completed" ? "Completed" : "Upcoming"}
           </span>
         </div>
-        <Sprint_Health_Badge health={health} />
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <Sprint_Health_Badge health={health} />
+          {sprintTickets.length > 0 && (
+            <button
+              onClick={onToggleExpand}
+              style={{
+                padding: "4px 6px", background: "transparent",
+                border: "1px solid var(--alps-border)", borderRadius: "3px",
+                color: "var(--alps-text-muted)", cursor: "pointer",
+                fontSize: "10px", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px",
+                transition: "all 0.15s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--alps-text)"; e.currentTarget.style.color = "var(--alps-text)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--alps-border)"; e.currentTarget.style.color = "var(--alps-text-muted)"; }}
+            >
+              {expanded ? "−" : "+"} Details
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Project badge + link */}
@@ -74,22 +97,38 @@ function Sprint_Card({ sprint, health, onViewProject }) {
             }}>{project.id}</span>
             <span style={{ fontSize: "11px", color: "var(--alps-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "160px" }}>{project.title}</span>
           </div>
-          {onViewProject && (
+          <div style={{ display: "flex", gap: "6px" }}>
             <button
-              onClick={() => onViewProject(project.id)}
+              onClick={() => window.open(`Progress.html?projectId=${project.id}`, "_blank")}
               style={{
                 padding: "2px 8px", background: "transparent",
                 border: "1px solid var(--alps-border)", borderRadius: "3px",
-                color: "var(--alps-accent)", cursor: "pointer",
+                color: "var(--alps-primary)", cursor: "pointer",
                 fontSize: "10px", fontWeight: 600, fontFamily: "var(--font-sans)",
                 flexShrink: 0, transition: "border-color 0.15s",
               }}
-              onMouseEnter={(e) => e.currentTarget.style.borderColor = "var(--alps-accent)"}
+              onMouseEnter={(e) => e.currentTarget.style.borderColor = "var(--alps-primary)"}
               onMouseLeave={(e) => e.currentTarget.style.borderColor = "var(--alps-border)"}
             >
-              View →
+              Progress →
             </button>
-          )}
+            {onViewProject && (
+              <button
+                onClick={() => onViewProject(project.id)}
+                style={{
+                  padding: "2px 8px", background: "transparent",
+                  border: "1px solid var(--alps-border)", borderRadius: "3px",
+                  color: "var(--alps-accent)", cursor: "pointer",
+                  fontSize: "10px", fontWeight: 600, fontFamily: "var(--font-sans)",
+                  flexShrink: 0, transition: "border-color 0.15s",
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = "var(--alps-accent)"}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = "var(--alps-border)"}
+              >
+                Dashboard →
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -110,6 +149,42 @@ function Sprint_Card({ sprint, health, onViewProject }) {
           <div style={{ height: "100%", width: `${completionPct}%`, background: statusColor, transition: "width 0.3s" }} />
         </div>
       </div>
+
+      {/* Expanded details */}
+      {expanded && sprintTickets.length > 0 && (
+        <div style={{ marginTop: "6px", padding: "12px", background: "var(--alps-bg-alt)", borderRadius: "4px", display: "grid", gap: "10px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
+            <div>
+              <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", marginBottom: "4px" }}>In Progress</div>
+              <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--alps-accent)" }}>{inProgressTickets.length}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", marginBottom: "4px" }}>Blocked</div>
+              <div style={{ fontSize: "16px", fontWeight: 700, color: blockedTickets.length > 0 ? "var(--alps-danger)" : "var(--alps-text-muted)" }}>{blockedTickets.length}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", marginBottom: "4px" }}>Velocity</div>
+              <div style={{ fontSize: "16px", fontWeight: 700, color: "var(--alps-text)" }}>{sprint.completedTickets}</div>
+            </div>
+          </div>
+          
+          {blockedTickets.length > 0 && (
+            <div style={{ padding: "8px 10px", background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: "4px" }}>
+              <div style={{ fontSize: "10px", fontWeight: 600, color: "var(--alps-danger)", marginBottom: "4px" }}>⚠ Blocked Tickets</div>
+              {blockedTickets.slice(0, 3).map(t => (
+                <div key={t.id} style={{ fontSize: "10px", color: "var(--alps-text)", marginTop: "2px" }}>
+                  • {t.id}: {t.title}
+                </div>
+              ))}
+              {blockedTickets.length > 3 && (
+                <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", marginTop: "4px" }}>
+                  + {blockedTickets.length - 3} more
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -222,14 +297,27 @@ function Workload_Summary({ workload }) {
 
 function CyclesScreen({ role, setScreen, setActiveProjectId, setFromPortfolio }) {
   const [hoveredSprint, setHoveredSprint] = React.useState(null);
+  const [expandedSprint, setExpandedSprint] = React.useState(null);
+  const [filterProject, setFilterProject] = React.useState("all");
+  const [searchQuery, setSearchQuery] = React.useState("");
   const today = new Date();
 
   const cycles  = window.CYCLES         || [];
   const sprints = window.SPRINTS        || [];
   const tickets = window.LINEAR_TICKETS || {};
   const people  = window.PEOPLE         || {};
+  const projects = window.PROJECTS      || [];
 
   const workload = window.computeWorkload(sprints, tickets, people);
+
+  // Filter sprints by project and search
+  const filteredSprints = React.useMemo(() => {
+    return sprints.filter(s => {
+      if (filterProject !== "all" && s.projectId !== filterProject) return false;
+      if (searchQuery && !s.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      return true;
+    });
+  }, [sprints, filterProject, searchQuery]);
 
   // Navigate to a project's dashboard
   const handleViewProject = React.useCallback((projectId) => {
@@ -238,15 +326,85 @@ function CyclesScreen({ role, setScreen, setActiveProjectId, setFromPortfolio })
     if (setScreen) setScreen("dashboard");
   }, [setScreen, setActiveProjectId, setFromPortfolio]);
 
+  // Compute summary stats
+  const totalSprints = filteredSprints.length;
+  const activeSprints = filteredSprints.filter(s => s.status === "in_progress").length;
+  const completedSprints = filteredSprints.filter(s => s.status === "completed").length;
+  const avgCompletion = totalSprints === 0 ? 0 : Math.round(
+    filteredSprints.reduce((sum, s) => sum + (s.totalTickets === 0 ? 0 : (s.completedTickets / s.totalTickets) * 100), 0) / totalSprints
+  );
+
   if (cycles.length === 0) {
     return <div style={{ padding: "24px", color: "var(--alps-text-muted)", fontSize: "14px" }}>No cycles found.</div>;
   }
 
   return (
     <div>
+      {/* Header with summary stats */}
       <div style={{ marginBottom: "20px" }}>
-        <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>Cycles & Sprints</div>
-        <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 700, color: "var(--alps-text)" }}>Delivery Timeline</h1>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "16px" }}>
+          <div>
+            <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>Cycles & Sprints</div>
+            <h1 style={{ margin: 0, fontSize: "22px", fontWeight: 700, color: "var(--alps-text)" }}>Delivery Timeline</h1>
+          </div>
+          <div style={{ display: "flex", gap: "12px" }}>
+            <div style={{ padding: "8px 12px", background: "var(--alps-bg-alt)", border: "1px solid var(--alps-border)", borderRadius: "6px", textAlign: "center" }}>
+              <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--alps-text)" }}>{totalSprints}</div>
+              <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Total</div>
+            </div>
+            <div style={{ padding: "8px 12px", background: "var(--alps-bg-alt)", border: "1px solid var(--alps-border)", borderRadius: "6px", textAlign: "center" }}>
+              <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--alps-accent)" }}>{activeSprints}</div>
+              <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Active</div>
+            </div>
+            <div style={{ padding: "8px 12px", background: "var(--alps-bg-alt)", border: "1px solid var(--alps-border)", borderRadius: "6px", textAlign: "center" }}>
+              <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--alps-success)" }}>{completedSprints}</div>
+              <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Done</div>
+            </div>
+            <div style={{ padding: "8px 12px", background: "var(--alps-bg-alt)", border: "1px solid var(--alps-border)", borderRadius: "6px", textAlign: "center" }}>
+              <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--alps-text)" }}>{avgCompletion}%</div>
+              <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Avg</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <input
+            type="text"
+            placeholder="Search sprints..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              padding: "8px 12px", fontSize: "12px", background: "var(--alps-bg-alt)",
+              border: "1px solid var(--alps-border)", borderRadius: "6px",
+              color: "var(--alps-text)", width: "240px", outline: "none",
+            }}
+          />
+          <select
+            value={filterProject}
+            onChange={(e) => setFilterProject(e.target.value)}
+            style={{
+              padding: "8px 12px", fontSize: "12px", background: "var(--alps-bg-alt)",
+              border: "1px solid var(--alps-border)", borderRadius: "6px",
+              color: "var(--alps-text)", cursor: "pointer", outline: "none",
+            }}
+          >
+            <option value="all">All projects</option>
+            {projects.map(p => <option key={p.id} value={p.id}>{p.id} — {p.title}</option>)}
+          </select>
+          {(filterProject !== "all" || searchQuery) && (
+            <button
+              onClick={() => { setFilterProject("all"); setSearchQuery(""); }}
+              style={{
+                padding: "8px 12px", fontSize: "11px", background: "transparent",
+                border: "1px solid var(--alps-border)", borderRadius: "6px",
+                color: "var(--alps-accent)", cursor: "pointer", fontWeight: 600,
+              }}
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: "24px", alignItems: "start" }}>
@@ -254,12 +412,16 @@ function CyclesScreen({ role, setScreen, setActiveProjectId, setFromPortfolio })
         {/* LEFT: Cycle groups */}
         <div style={{ display: "grid", gap: "24px" }}>
           {cycles.map((cycle) => {
-            const cycleSprints = sprints.filter((s) => s.cycle === cycle.name);
+            const cycleSprints = filteredSprints.filter((s) => s.cycle === cycle.name);
             const cycleStatusColor = {
               in_progress: "var(--alps-accent)",
               planned:     "var(--alps-text-muted)",
               completed:   "var(--alps-success)",
             }[cycle.status] || "var(--alps-text-muted)";
+
+            if (cycleSprints.length === 0 && (filterProject !== "all" || searchQuery)) {
+              return null; // Hide empty cycles when filtering
+            }
 
             return (
               <div key={cycle.id} style={{ background: "var(--alps-bg-alt)", border: "1px solid var(--alps-border)", borderRadius: "8px", padding: "16px" }}>
@@ -283,11 +445,20 @@ function CyclesScreen({ role, setScreen, setActiveProjectId, setFromPortfolio })
                 {cycleSprints.length > 0 ? (
                   <div style={{ display: "grid", gap: "8px", marginTop: "12px" }}>
                     {cycleSprints.map((sprint) => (
-                      <Sprint_Card key={sprint.id} sprint={sprint} health={window.computeSprintHealth(sprint, today)} onViewProject={handleViewProject} />
+                      <Sprint_Card
+                        key={sprint.id}
+                        sprint={sprint}
+                        health={window.computeSprintHealth(sprint, today)}
+                        onViewProject={handleViewProject}
+                        expanded={expandedSprint === sprint.id}
+                        onToggleExpand={() => setExpandedSprint(expandedSprint === sprint.id ? null : sprint.id)}
+                      />
                     ))}
                   </div>
                 ) : (
-                  <div style={{ fontSize: "12px", color: "var(--alps-text-muted)", padding: "12px 0" }}>No sprints in this cycle.</div>
+                  <div style={{ fontSize: "12px", color: "var(--alps-text-muted)", padding: "12px 0", textAlign: "center" }}>
+                    {filterProject !== "all" || searchQuery ? "No sprints match the current filters." : "No sprints in this cycle."}
+                  </div>
                 )}
               </div>
             );
