@@ -157,7 +157,7 @@
                 <div style={{ fontSize: "15px", fontWeight: 600 }}>Progress &amp; Cycles</div>
               </div>
             </div>
-            <button onClick={() => window.close()} className="button-secondary">✕ Close</button>
+            <button onClick={() => { if (document.referrer) { window.close(); } else { window.location.href = "ALPS Prototype.html"; } }} className="button-secondary">← Back to Dashboard</button>
           </header>
 
           <main className="alps-main">
