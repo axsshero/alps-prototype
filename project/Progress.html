@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progress & Cycles — ALPS</title>
+  <style>
+    :root {
+      --alps-primary: #2563eb;
+      --alps-accent: #0891b2;
+      --alps-success: #10b981;
+      --alps-warning: #f59e0b;
+      --alps-danger: #ef4444;
+      --alps-bg: #0f172a;
+      --alps-bg-alt: #1a2847;
+      --alps-bg-hover: #243658;
+      --alps-text: #f0f0f0;
+      --alps-text-muted: #9ca3af;
+      --alps-border: #374151;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body, html { margin: 0; padding: 0; font-family: var(--font-sans); }
+    .alps-app { background: var(--alps-bg); color: var(--alps-text); min-height: 100vh; display: flex; flex-direction: column; }
+    .alps-header {
+      background: var(--alps-bg-alt); border-bottom: 1px solid var(--alps-border);
+      padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
+      gap: 24px; position: sticky; top: 0; z-index: 100;
+    }
+    .alps-main { flex: 1; padding: 24px; overflow-y: auto; }
+    .button-secondary {
+      padding: 8px 12px; background: transparent; color: var(--alps-text-muted);
+      border: 1px solid var(--alps-border); border-radius: 4px; cursor: pointer;
+      font-size: 12px; font-weight: 600; transition: all 0.2s;
+    }
+    .button-secondary:hover { color: var(--alps-text); border-color: var(--alps-text); }
+    select { font-family: var(--font-sans); }
+    select:focus { outline: 1px solid var(--alps-primary); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // --- Data ---
+    const PROJECT = {
+      id: "ALI-42",
+      title: "Recurring Engine — Subscription Billing",
+    };
+
+    const PEOPLE = {
+      rina: { fullName: "Rina Patel", initials: "RP" },
+      maya: { fullName: "Maya Chen", initials: "MC" },
+      mateo: { fullName: "Mateo Rodriguez", initials: "MR" },
+      jun: { fullName: "Jun Park", initials: "JP" },
+      lena: { fullName: "Lena Okafor", initials: "LO" },
+    };
+
+    const CYCLES = [
+      { id: "S11", name: "Sprint 11", startDate: "2026-03-23", endDate: "2026-04-05" },
+      { id: "S12", name: "Sprint 12", startDate: "2026-04-06", endDate: "2026-04-19" },
+      { id: "S13", name: "Sprint 13", startDate: "2026-04-20", endDate: "2026-05-03" },
+      { id: "S14", name: "Sprint 14", startDate: "2026-05-04", endDate: "2026-05-17" },
+    ];
+
+    const TICKETS = [
+      { id: "LIN-201", title: "Design payment retry state machine", status: "done", priority: "high", assignee: "rina", gate: "business", cycle: "S11", dueDate: "2026-04-02", description: "Define state transitions for payment retry: pending → retrying → success/failed. Include max attempts, backoff strategy, and final failure handling.", gitlab: "MR !115", progress: 100 },
+      { id: "LIN-202", title: "Set up database schema for billing", status: "done", priority: "high", assignee: "jun", gate: "business", cycle: "S11", dueDate: "2026-04-04", description: "Create tables: subscriptions, invoices, payment_attempts, dunning_state. Add indexes for performance.", gitlab: "MR !118", progress: 100 },
+      { id: "LIN-203", title: "Create billing service skeleton", status: "done", priority: "high", assignee: "jun", gate: "business", cycle: "S11", dueDate: "2026-04-06", description: "Set up API endpoints, dependency injection, and configuration management for billing service.", gitlab: "MR !122", progress: 100 },
+      { id: "LIN-204", title: "Auth & permissions for billing admin", status: "done", priority: "medium", assignee: "lena", gate: "business", cycle: "S11", dueDate: "2026-04-08", description: "RBAC for billing admin actions: refund, manual retry, subscription override.", gitlab: "MR !127", progress: 100 },
+      { id: "LIN-205", title: "Implement retry logic with exponential backoff", status: "in_progress", priority: "high", assignee: "jun", gate: "product", cycle: "S12", dueDate: "2026-04-15", description: "Exponential backoff: 2^attempt + jitter (±10%). Max 5 retries. Configurable per product.", gitlab: "MR !132", progress: 75 },
+      { id: "LIN-206", title: "Build billing dashboard UI", status: "in_progress", priority: "high", assignee: "lena", gate: "product", cycle: "S12", dueDate: "2026-04-18", description: "Invoice list, payment history, retry status. Real-time updates via websockets.", gitlab: "MR !135", progress: 60 },
+      { id: "LIN-207", title: "Email notifications for failed payments", status: "done", priority: "medium", assignee: "lena", gate: "product", cycle: "S12", dueDate: "2026-04-20", description: "Transactional emails via SendGrid: payment failed, retry scheduled, final failure.", gitlab: "MR !140", progress: 100 },
+      { id: "LIN-208", title: "Webhook fan-out to CRM/Analytics", status: "blocked", priority: "high", assignee: "jun", gate: "product", cycle: "S12", dueDate: "2026-04-22", description: "Emit events: payment.failed, payment.succeeded, subscription.at_risk. Subscribers: Salesforce, Mixpanel.", gitlab: "MR !142", progress: 20, blockedBy: "Payments API v3 access — pending procurement approval" },
+      { id: "LIN-209", title: "Dunning rules configuration", status: "todo", priority: "medium", assignee: "jun", gate: "product", cycle: "S12", dueDate: "2026-04-25", description: "Admin UI for per-product dunning rules: max attempts, retry window, on-exhaustion action.", gitlab: "—", progress: 0 },
+      { id: "LIN-210", title: "Customer portal: subscription management", status: "todo", priority: "high", assignee: "lena", gate: "tech", cycle: "S13", dueDate: "2026-04-28", description: "View subscriptions, update payment method, pause/cancel. Self-serve flows.", gitlab: "—", progress: 0 },
+      { id: "LIN-211", title: "Handle partial refunds during retry", status: "todo", priority: "medium", assignee: "jun", gate: "tech", cycle: "S13", dueDate: "2026-04-30", description: "Edge case: detect refund webhook during active retry, pause state machine.", gitlab: "—", progress: 0 },
+      { id: "LIN-212", title: "Subscription cancellation mid-retry", status: "blocked", priority: "medium", assignee: "jun", gate: "tech", cycle: "S13", dueDate: "2026-05-02", description: "Handle subscription.cancelled while retry is active. Stop retry, refund partial period.", gitlab: "—", progress: 0, blockedBy: "Awaiting product spec from Maya" },
+      { id: "LIN-213", title: "Cascading failure handling", status: "todo", priority: "high", assignee: "jun", gate: "tech", cycle: "S13", dueDate: "2026-05-04", description: "Circuit breaker for downstream calls. Prevent retry storms during payment provider outages.", gitlab: "—", progress: 0 },
+      { id: "LIN-214", title: "Load testing & performance tuning", status: "todo", priority: "high", assignee: "mateo", gate: "tech", cycle: "S14", dueDate: "2026-05-08", description: "Test 1000s of concurrent retries. Tool: K6. Target: P99 < 500ms.", gitlab: "—", progress: 0 },
+      { id: "LIN-215", title: "E2E tests for full billing flow", status: "todo", priority: "high", assignee: "lena", gate: "tech", cycle: "S14", dueDate: "2026-05-10", description: "Integration tests via Playwright. Cover happy path, retries, refunds, cancellations.", gitlab: "—", progress: 0 },
+      { id: "LIN-216", title: "Integration with Payments API v3", status: "todo", priority: "critical", assignee: "jun", gate: "tech", cycle: "S14", dueDate: "2026-05-13", description: "Connect to new Stripe Billing API v3 endpoints. Migrate from v2.", gitlab: "—", progress: 0 },
+      { id: "LIN-217", title: "Production readiness review", status: "todo", priority: "high", assignee: "mateo", gate: "tech", cycle: "S14", dueDate: "2026-05-16", description: "Security review (OWASP Top 10), pen test, runbook, on-call rotation.", gitlab: "—", progress: 0 },
+    ];
+
+    // --- Helpers ---
+    const TODAY = new Date("2026-05-01");
+    const isOverdue = (t) => {
+      if (!t.dueDate || t.status === "done") return false;
+      return new Date(t.dueDate) < TODAY;
+    };
+    const statusColor = (s) => s === "done" ? "var(--alps-success)" : s === "in_progress" ? "var(--alps-primary)" : s === "blocked" ? "var(--alps-danger)" : "var(--alps-text-muted)";
+    const statusBg = (s) => s === "done" ? "rgba(16, 185, 129, 0.12)" : s === "in_progress" ? "rgba(37, 99, 235, 0.14)" : s === "blocked" ? "rgba(239, 68, 68, 0.12)" : "rgba(148, 163, 184, 0.1)";
+    const priorityColor = (p) => p === "critical" ? "#dc2626" : p === "high" ? "#ea580c" : p === "medium" ? "#ca8a04" : "var(--alps-text-muted)";
+
+    function Avatar({ person, size = 22 }) {
+      const p = PEOPLE[person];
+      const hue = Math.abs((person || "x").charCodeAt(0) * 17) % 360;
+      return (
+        <div style={{
+          width: size, height: size, borderRadius: "4px",
+          background: `hsl(${hue}, 55%, 50%)`, color: "white",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: size * 0.45, fontWeight: 600,
+        }}>{p?.initials || "?"}</div>
+      );
+    }
+
+    function App() {
+      const [filterCycle, setFilterCycle] = useState("all");
+      const [filterStatus, setFilterStatus] = useState("all");
+      const [filterPriority, setFilterPriority] = useState("all");
+      const [filterAssignee, setFilterAssignee] = useState("all");
+      const [search, setSearch] = useState("");
+      const [selectedId, setSelectedId] = useState(null);
+
+      const filtered = TICKETS.filter(t => {
+        if (filterCycle !== "all" && t.cycle !== filterCycle) return false;
+        if (filterStatus !== "all" && t.status !== filterStatus) return false;
+        if (filterPriority !== "all" && t.priority !== filterPriority) return false;
+        if (filterAssignee !== "all" && t.assignee !== filterAssignee) return false;
+        if (search && !(t.title.toLowerCase().includes(search.toLowerCase()) || t.id.toLowerCase().includes(search.toLowerCase()))) return false;
+        return true;
+      });
+
+      const overdueCount = TICKETS.filter(isOverdue).length;
+      const blockedCount = TICKETS.filter(t => t.status === "blocked").length;
+      const doneCount = TICKETS.filter(t => t.status === "done").length;
+      const inProgCount = TICKETS.filter(t => t.status === "in_progress").length;
+      const blockedByGate = ["business","product","tech"].map(g => ({
+        gate: g,
+        count: TICKETS.filter(t => t.gate === g && t.status === "blocked").length,
+      })).sort((a,b) => b.count - a.count)[0];
+
+      const assignees = [...new Set(TICKETS.map(t => t.assignee))];
+      const selected = selectedId ? TICKETS.find(t => t.id === selectedId) : null;
+
+      const filtersActive = filterCycle !== "all" || filterStatus !== "all" || filterPriority !== "all" || filterAssignee !== "all" || search !== "";
+
+      return (
+        <div className="alps-app">
+          <header className="alps-header">
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ width: "24px", height: "24px", borderRadius: "5px", background: "var(--alps-primary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 700, color: "white" }}>A</div>
+                <div style={{ fontSize: "13px", fontWeight: 600 }}>ALPS</div>
+              </div>
+              <div style={{ width: "1px", height: "20px", background: "var(--alps-border)" }}></div>
+              <div>
+                <div style={{ fontSize: "12px", color: "var(--alps-text-muted)", marginBottom: "2px" }}>{PROJECT.id} · {PROJECT.title}</div>
+                <div style={{ fontSize: "15px", fontWeight: 600 }}>Progress &amp; Cycles</div>
+              </div>
+            </div>
+            <button onClick={() => window.close()} className="button-secondary">✕ Close</button>
+          </header>
+
+          <main className="alps-main">
+            <div style={{ display: "grid", gap: "20px", maxWidth: "1400px", margin: "0 auto" }}>
+              {/* Quick Insights */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
+                <InsightCard label="Total Tickets" value={TICKETS.length} sub={`${doneCount} done · ${Math.round(doneCount / TICKETS.length * 100)}% complete`} />
+                <InsightCard label="In Progress" value={inProgCount} sub="active work" valueColor="var(--alps-primary)" />
+                <InsightCard label="Overdue" value={overdueCount} sub={`${Math.round(overdueCount / TICKETS.length * 100)}% of tickets`} valueColor={overdueCount > 0 ? "#dc2626" : undefined} alert={overdueCount > 0} />
+                <InsightCard label="Bottleneck" value={blockedByGate?.count || 0} sub={`blocked at ${blockedByGate?.gate || "—"} gate`} valueColor={blockedCount > 0 ? "var(--alps-danger)" : undefined} alert={blockedCount > 0} />
+              </div>
+
+              {/* Section 1 — Scheduled Cycles */}
+              <div style={{ display: "grid", gap: "12px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--alps-text)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Scheduled Cycles</div>
+                  <div style={{ fontSize: "11px", color: "var(--alps-text-muted)" }}>Click a cycle to filter tickets</div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: `repeat(${CYCLES.length}, 1fr)`, gap: "12px" }}>
+                  {CYCLES.map(cycle => {
+                    const ct = TICKETS.filter(t => t.cycle === cycle.id);
+                    const done = ct.filter(t => t.status === "done").length;
+                    const inProg = ct.filter(t => t.status === "in_progress").length;
+                    const blocked = ct.filter(t => t.status === "blocked").length;
+                    const pct = ct.length > 0 ? Math.round((done / ct.length) * 100) : 0;
+                    const active = filterCycle === cycle.id;
+                    return (
+                      <div
+                        key={cycle.id}
+                        onClick={() => setFilterCycle(active ? "all" : cycle.id)}
+                        style={{
+                          padding: "14px",
+                          background: active ? "rgba(37, 99, 235, 0.1)" : "var(--alps-bg-alt)",
+                          border: `1px solid ${active ? "var(--alps-primary)" : "var(--alps-border)"}`,
+                          borderRadius: "8px", cursor: "pointer",
+                          display: "grid", gap: "10px", transition: "all 0.15s",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <div style={{ fontSize: "13px", fontWeight: 600 }}>{cycle.name}</div>
+                          <div style={{ fontSize: "12px", fontWeight: 700, color: active ? "var(--alps-primary)" : "var(--alps-text)" }}>{pct}%</div>
+                        </div>
+                        <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontFamily: "monospace" }}>{cycle.startDate} → {cycle.endDate}</div>
+                        <div style={{ height: "4px", background: "var(--alps-bg)", borderRadius: "2px", overflow: "hidden" }}>
+                          <div style={{ height: "100%", background: "var(--alps-primary)", width: `${pct}%`, transition: "width 0.3s" }}></div>
+                        </div>
+                        <div style={{ display: "flex", gap: "10px", fontSize: "10px", fontWeight: 600 }}>
+                          <span style={{ color: "var(--alps-success)" }}>● {done}</span>
+                          <span style={{ color: "var(--alps-primary)" }}>● {inProg}</span>
+                          {blocked > 0 && <span style={{ color: "var(--alps-danger)" }}>● {blocked}</span>}
+                          <span style={{ color: "var(--alps-text-muted)", marginLeft: "auto" }}>{ct.length} total</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Filters bar */}
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", background: "var(--alps-bg-alt)", border: "1px solid var(--alps-border)", borderRadius: "8px", flexWrap: "wrap" }}>
+                <input
+                  type="text" placeholder="Search tickets..."
+                  value={search} onChange={(e) => setSearch(e.target.value)}
+                  style={{ padding: "6px 10px", fontSize: "12px", background: "var(--alps-bg)", border: "1px solid var(--alps-border)", borderRadius: "4px", color: "var(--alps-text)", width: "200px", fontFamily: "var(--font-sans)", outline: "none" }}
+                />
+                <div style={{ width: "1px", height: "20px", background: "var(--alps-border)" }}></div>
+                {[
+                  { value: filterCycle, set: setFilterCycle, options: [["all","All cycles"], ...CYCLES.map(c => [c.id, c.name])] },
+                  { value: filterStatus, set: setFilterStatus, options: [["all","All status"],["todo","Todo"],["in_progress","In progress"],["blocked","Blocked"],["done","Done"]] },
+                  { value: filterPriority, set: setFilterPriority, options: [["all","All priority"],["critical","Critical"],["high","High"],["medium","Medium"],["low","Low"]] },
+                  { value: filterAssignee, set: setFilterAssignee, options: [["all","All assignees"], ...assignees.map(a => [a, PEOPLE[a]?.fullName || a])] },
+                ].map(({ value, set, options }, i) => (
+                  <select key={i} value={value} onChange={(e) => set(e.target.value)} style={{ padding: "6px 10px", fontSize: "12px", background: "var(--alps-bg)", border: "1px solid var(--alps-border)", borderRadius: "4px", color: "var(--alps-text)", cursor: "pointer", outline: "none" }}>
+                    {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                  </select>
+                ))}
+                {filtersActive && (
+                  <button
+                    onClick={() => { setFilterCycle("all"); setFilterStatus("all"); setFilterPriority("all"); setFilterAssignee("all"); setSearch(""); }}
+                    style={{ padding: "6px 10px", fontSize: "11px", background: "transparent", border: "none", color: "var(--alps-primary)", cursor: "pointer", fontWeight: 600 }}
+                  >Clear all</button>
+                )}
+                <div style={{ marginLeft: "auto", fontSize: "11px", color: "var(--alps-text-muted)" }}>
+                  Showing <span style={{ color: "var(--alps-text)", fontWeight: 600 }}>{filtered.length}</span> of {TICKETS.length}
+                </div>
+              </div>
+
+              {/* Tickets table + Detail panel */}
+              <div style={{ display: "grid", gridTemplateColumns: selected ? "1fr 380px" : "1fr", gap: "16px", alignItems: "start" }}>
+                <div style={{ background: "var(--alps-bg-alt)", border: "1px solid var(--alps-border)", borderRadius: "8px", overflow: "hidden" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "100px 1fr 100px 90px 70px 100px 60px", gap: "12px", padding: "10px 14px", background: "var(--alps-bg)", borderBottom: "1px solid var(--alps-border)", fontSize: "10px", fontWeight: 600, color: "var(--alps-text-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                    <div>Ticket</div><div>Title</div><div>Status</div><div>Priority</div><div>Gate</div><div>Due</div><div style={{ textAlign: "right" }}>Owner</div>
+                  </div>
+                  {filtered.length === 0 && (
+                    <div style={{ padding: "32px", textAlign: "center", color: "var(--alps-text-muted)", fontSize: "13px" }}>No tickets match the current filters.</div>
+                  )}
+                  {filtered.map(t => {
+                    const overdue = isOverdue(t);
+                    const isSelected = selected?.id === t.id;
+                    return (
+                      <div
+                        key={t.id}
+                        onClick={() => setSelectedId(isSelected ? null : t.id)}
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "100px 1fr 100px 90px 70px 100px 60px",
+                          gap: "12px", padding: "10px 14px",
+                          borderBottom: "1px solid var(--alps-border)",
+                          background: isSelected ? "rgba(37, 99, 235, 0.08)" : t.status === "blocked" ? "rgba(239, 68, 68, 0.04)" : "transparent",
+                          cursor: "pointer", alignItems: "center",
+                          fontSize: "12px", transition: "background 0.15s",
+                        }}
+                        onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = "rgba(255,255,255,0.025)"; }}
+                        onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = t.status === "blocked" ? "rgba(239, 68, 68, 0.04)" : "transparent"; }}
+                      >
+                        <div style={{ fontFamily: "monospace", fontSize: "11px", color: "var(--alps-text-muted)", fontWeight: 600 }}>{t.id}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--alps-text)", overflow: "hidden" }}>
+                          {t.status === "blocked" && <span style={{ color: "var(--alps-danger)" }}>⚠</span>}
+                          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</span>
+                        </div>
+                        <div>
+                          <span style={{ fontSize: "10px", fontWeight: 600, color: statusColor(t.status), padding: "2px 8px", background: statusBg(t.status), borderRadius: "3px", textTransform: "uppercase", letterSpacing: "0.04em" }}>{t.status.replace("_", " ")}</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: priorityColor(t.priority) }}></span>
+                          <span style={{ textTransform: "capitalize", fontSize: "11px" }}>{t.priority}</span>
+                        </div>
+                        <div style={{ fontSize: "10px", textTransform: "uppercase", color: "var(--alps-text-muted)", fontWeight: 600, letterSpacing: "0.04em" }}>{t.gate}</div>
+                        <div style={{ fontSize: "11px", fontFamily: "monospace", color: overdue ? "#dc2626" : "var(--alps-text-muted)", fontWeight: overdue ? 600 : 400 }}>{overdue && "⚠ "}{t.dueDate?.slice(5) || "—"}</div>
+                        <div style={{ display: "flex", justifyContent: "flex-end" }}><Avatar person={t.assignee} size={22} /></div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Detail panel */}
+                {selected && <DetailPanel ticket={selected} onClose={() => setSelectedId(null)} />}
+              </div>
+            </div>
+          </main>
+        </div>
+      );
+    }
+
+    function InsightCard({ label, value, sub, valueColor, alert }) {
+      return (
+        <div style={{
+          padding: "14px 16px",
+          background: alert ? "rgba(239, 68, 68, 0.06)" : "var(--alps-bg-alt)",
+          border: `1px solid ${alert ? "rgba(239, 68, 68, 0.3)" : "var(--alps-border)"}`,
+          borderRadius: "8px",
+        }}>
+          <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", marginBottom: "6px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
+          <div style={{ fontSize: "22px", fontWeight: 700, color: valueColor || "var(--alps-text)" }}>{value}</div>
+          <div style={{ fontSize: "11px", color: "var(--alps-text-muted)", marginTop: "2px", textTransform: "capitalize" }}>{sub}</div>
+        </div>
+      );
+    }
+
+    function DetailPanel({ ticket: t, onClose }) {
+      const cycleName = CYCLES.find(c => c.id === t.cycle)?.name || t.cycle;
+      const overdue = isOverdue(t);
+      const Field = ({ label, children }) => (
+        <div>
+          <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", textTransform: "uppercase", marginBottom: "4px", fontWeight: 600, letterSpacing: "0.04em" }}>{label}</div>
+          <div>{children}</div>
+        </div>
+      );
+      return (
+        <div style={{ position: "sticky", top: "16px", background: "var(--alps-bg-alt)", border: "1px solid var(--alps-border)", borderRadius: "8px", padding: "18px", display: "grid", gap: "16px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontFamily: "monospace", fontWeight: 600, marginBottom: "4px" }}>{t.id}</div>
+              <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--alps-text)", lineHeight: 1.35 }}>{t.title}</div>
+            </div>
+            <button onClick={onClose} style={{ background: "transparent", border: "none", color: "var(--alps-text-muted)", fontSize: "16px", cursor: "pointer", padding: "0 4px" }}>✕</button>
+          </div>
+
+          {t.status === "blocked" && (
+            <div style={{ padding: "10px 12px", background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.3)", borderRadius: "6px", display: "flex", gap: "8px", alignItems: "flex-start" }}>
+              <div style={{ color: "var(--alps-danger)", fontSize: "12px" }}>⚠</div>
+              <div>
+                <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--alps-danger)", marginBottom: "2px" }}>Blocked</div>
+                <div style={{ fontSize: "11px", color: "var(--alps-text)", lineHeight: 1.4 }}>{t.blockedBy || "Awaiting upstream dependency"}</div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 16px" }}>
+            <Field label="Status"><div style={{ fontSize: "12px", fontWeight: 600, color: statusColor(t.status), textTransform: "capitalize" }}>{t.status.replace("_", " ")}</div></Field>
+            <Field label="Priority"><div style={{ fontSize: "12px", fontWeight: 600, color: priorityColor(t.priority), textTransform: "capitalize" }}>{t.priority}</div></Field>
+            <Field label="Assignee">
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <Avatar person={t.assignee} size={18} />
+                <div style={{ fontSize: "11px" }}>{PEOPLE[t.assignee]?.fullName}</div>
+              </div>
+            </Field>
+            <Field label="Due Date">
+              <div style={{ fontSize: "11px", fontFamily: "monospace", color: overdue ? "#dc2626" : "var(--alps-text)", fontWeight: overdue ? 600 : 400 }}>
+                {overdue && "⚠ "}{t.dueDate || "—"}
+              </div>
+            </Field>
+            <Field label="Linked Gate"><div style={{ fontSize: "11px", fontWeight: 600, color: "var(--alps-text)", textTransform: "capitalize", padding: "2px 8px", background: "var(--alps-bg)", borderRadius: "3px", display: "inline-block" }}>{t.gate}</div></Field>
+            <Field label="Cycle"><div style={{ fontSize: "11px" }}>{cycleName}</div></Field>
+          </div>
+
+          <Field label="Description">
+            <div style={{ fontSize: "12px", color: "var(--alps-text)", lineHeight: 1.5, padding: "10px 12px", background: "var(--alps-bg)", borderRadius: "4px" }}>{t.description}</div>
+          </Field>
+
+          <Field label="Git Activity">
+            <div style={{ display: "grid", gap: "6px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 10px", background: "var(--alps-bg)", borderRadius: "4px", fontSize: "11px" }}>
+                <span style={{ fontFamily: "monospace", color: "var(--alps-primary)", fontWeight: 600 }}>{t.gitlab}</span>
+                <span style={{ color: "var(--alps-text-muted)", flex: 1 }}>{t.status === "done" ? "merged" : t.status === "in_progress" ? "open · 2 commits ahead" : t.gitlab === "—" ? "no branch yet" : "draft"}</span>
+              </div>
+              {t.progress > 0 && (
+                <div style={{ padding: "8px 10px", background: "var(--alps-bg)", borderRadius: "4px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "var(--alps-text-muted)", marginBottom: "4px" }}>
+                    <span>Progress</span><span style={{ fontWeight: 600, color: "var(--alps-text)" }}>{t.progress}%</span>
+                  </div>
+                  <div style={{ height: "4px", background: "var(--alps-bg-alt)", borderRadius: "2px", overflow: "hidden" }}>
+                    <div style={{ height: "100%", background: statusColor(t.status), width: `${t.progress}%` }}></div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Field>
+
+          {t.blockedBy && (
+            <Field label="Dependencies">
+              <div style={{ fontSize: "11px", padding: "8px 10px", background: "var(--alps-bg)", borderRadius: "4px" }}>
+                Blocked by: <span style={{ color: "var(--alps-danger)", fontWeight: 600 }}>{t.blockedBy}</span>
+              </div>
+            </Field>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
