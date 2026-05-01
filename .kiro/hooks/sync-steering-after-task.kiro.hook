@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Sync Steering After Spec Task",
+  "description": "After each spec task is completed, prompts the agent to review and update the alps-project.md steering document to reflect any new components, data shapes, conventions, or screen changes introduced by the task.",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A spec task was just completed. Review the changes made and update .kiro/steering/alps-project.md if anything has changed that the steering doc should reflect. This includes:\n- New screens or components added to the app\n- New or updated data shapes, globals, or window-exposed functions\n- New shared primitives or utilities\n- Changes to navigation structure or app shell\n- New coding conventions or patterns introduced\n- Any new CSS variables or styling approaches\n- Updates to the file structure\n\nOnly update the steering doc if something actually changed — don't make edits for the sake of it. Keep the doc accurate and concise."
+  }
+}

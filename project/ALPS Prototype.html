@@ -12,14 +12,17 @@
       --alps-warning: #f59e0b;
       --alps-danger: #ef4444;
       --alps-info: #06b6d4;
-      --alps-bg: #0f172a;
-      --alps-bg-alt: #1a2847;
-      --alps-bg-hover: #243658;
+      --alps-bg: #1a1a1a;
+      --alps-bg-alt: #262626;
+      --alps-bg-hover: #2e2e2e;
       --alps-text: #f0f0f0;
-      --alps-text-muted: #9ca3af;
-      --alps-border: #374151;
+      --alps-text-muted: #a0a0a0;
+      --alps-border: #3f3f3f;
       --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      --alps-cleared: #10b981;
+      --alps-active: #0891b2;
+      --alps-locked-stroke: #4b5563;
     }
 
     * { box-sizing: border-box; }
@@ -30,28 +33,30 @@
       color: var(--alps-text);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
     }
 
-    .alps-header {
+    .alps-sidebar {
+      width: 220px;
+      flex-shrink: 0;
       background: var(--alps-bg-alt);
-      border-bottom: 1px solid var(--alps-border);
-      padding: 12px 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
+      border-right: 1px solid var(--alps-border);
+      height: 100vh;
       position: sticky;
       top: 0;
-      z-index: 100;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
     }
 
     .alps-main {
       flex: 1;
       padding: 24px;
       overflow-y: auto;
+      min-height: 100vh;
     }
 
+    /* Gate cards */
     .gate-card {
       background: var(--alps-bg-alt);
       border: 1px solid var(--alps-border);
@@ -60,11 +65,7 @@
       overflow: hidden;
       transition: border-color 0.2s;
     }
-
-    .gate-card:hover {
-      border-color: var(--alps-accent);
-    }
-
+    .gate-card:hover { border-color: var(--alps-accent); }
     .gate-card-header {
       padding: 14px 16px;
       display: flex;
@@ -74,12 +75,7 @@
       cursor: pointer;
       user-select: none;
     }
-
-    .gate-card-header:hover,
-    .gate-card-header.expanded {
-      background: var(--alps-bg-hover);
-    }
-
+    .gate-card-header:hover, .gate-card-header.expanded { background: var(--alps-bg-hover); }
     .gate-card-body {
       padding: 16px;
       display: grid;
@@ -87,144 +83,105 @@
       border-top: 1px solid var(--alps-border);
     }
 
-    .checklist-item {
-      padding: 12px;
-      background: var(--alps-bg);
-      border-radius: 6px;
-      border-left: 3px solid var(--alps-border);
-      display: grid;
-      gap: 8px;
-    }
-
-    .checklist-item.complete { border-left-color: var(--alps-success); background: rgba(16, 185, 129, 0.04); }
-    .checklist-item.warning  { border-left-color: var(--alps-warning); background: rgba(245, 158, 11, 0.04); }
-
-    .checklist-item-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .checklist-item-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--alps-text);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .checklist-item-content {
-      font-size: 12px;
-      color: var(--alps-text-muted);
-      line-height: 1.5;
-    }
-
-    .checklist-item-content textarea,
-    .checklist-item-content input {
-      width: 100%;
-      padding: 8px 10px;
-      background: var(--alps-bg-alt);
-      border: 1px solid var(--alps-border);
-      border-radius: 4px;
-      color: var(--alps-text);
-      font-size: 12px;
-      font-family: var(--font-sans);
-      outline: none;
-    }
-
-    .checklist-item-content textarea {
-      resize: vertical;
-      min-height: 56px;
-    }
-
-    .checklist-item-content textarea:focus,
-    .checklist-item-content input:focus {
-      border-color: var(--alps-accent);
-    }
-
-    .ai-suggestion {
-      padding: 10px 12px;
-      background: rgba(245, 158, 11, 0.08);
-      border-left: 3px solid var(--alps-warning);
-      border-radius: 4px;
-      display: grid;
-      gap: 8px;
-    }
-
-    .ai-suggestion-label {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--alps-warning);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .ai-suggestion-text {
-      font-size: 11px;
-      color: var(--alps-text);
-      line-height: 1.45;
-    }
-
-    .ai-suggestion-actions {
-      display: flex;
-      gap: 6px;
-    }
-
-    .ai-suggestion-actions button {
-      padding: 4px 10px;
-      background: transparent;
-      border: 1px solid var(--alps-warning);
-      color: var(--alps-warning);
-      border-radius: 3px;
-      cursor: pointer;
-      font-size: 10px;
-      font-weight: 700;
-      font-family: var(--font-sans);
-      transition: background 0.15s;
-    }
-
-    .ai-suggestion-actions button:hover {
-      background: rgba(245, 158, 11, 0.15);
-    }
-
-    .gate-status-badge {
+    /* Primitives CSS */
+    .alps-avatar {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 4px 10px;
+      justify-content: center;
+      border-radius: 4px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .alps-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
       border-radius: 4px;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .alps-pill--neutral  { background: rgba(156,163,175,0.15); color: var(--alps-text-muted); }
+    .alps-pill--info     { background: rgba(6,182,212,0.15);   color: var(--alps-info); }
+    .alps-pill--success  { background: rgba(16,185,129,0.15);  color: var(--alps-success); }
+    .alps-pill--danger   { background: rgba(239,68,68,0.15);   color: var(--alps-danger); }
+    .alps-pill--muted    { background: rgba(156,163,175,0.1);  color: var(--alps-text-muted); }
+    .alps-pill--warning  { background: rgba(245,158,11,0.15);  color: var(--alps-warning); }
+    .alps-pill--mono     { font-family: var(--font-mono); font-size: 10px; }
+
+    .alps-gates {
+      display: inline-flex;
+      align-items: center;
     }
 
-    .gate-status-badge.complete  { background: rgba(16, 185, 129, 0.12); color: var(--alps-success); }
-    .gate-status-badge.in-progress { background: rgba(8, 145, 178, 0.12); color: var(--alps-accent); }
-    .gate-status-badge.locked    { background: rgba(107, 114, 128, 0.1); color: var(--alps-text-muted); }
+    .alps-gaterow {
+      display: flex;
+      gap: 8px;
+    }
 
-    .completion-bar-wrap {
+    .alps-gate {
+      flex: 1;
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 11px;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--alps-bg-alt);
+      border: 1px solid var(--alps-border);
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.15s, background 0.15s;
+      font-family: var(--font-sans);
+    }
+    .alps-gate:hover { border-color: var(--alps-accent); background: var(--alps-bg-hover); }
+    .alps-gate--selected { border-color: var(--alps-accent); background: rgba(8,145,178,0.08); }
+    .alps-gate__triangle { flex-shrink: 0; }
+    .alps-gate__meta { display: grid; gap: 2px; }
+    .alps-gate__index { font-size: 10px; color: var(--alps-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+    .alps-gate__label { font-size: 13px; font-weight: 600; color: var(--alps-text); }
+    .alps-gate__purpose { font-size: 11px; color: var(--alps-text-muted); }
+    .alps-gate__status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--alps-text-muted); margin-top: 2px; }
+    .alps-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+    .alps-dot--cleared { background: var(--alps-success); }
+    .alps-dot--active  { background: var(--alps-accent); }
+    .alps-dot--locked  { background: var(--alps-text-muted); }
+    .alps-mono { font-family: var(--font-mono); font-size: 10px; }
+
+    .alps-section {
+      background: var(--alps-bg-alt);
+      border: 1px solid var(--alps-border);
+      border-radius: 8px;
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+    .alps-section--dense { padding: 12px; gap: 10px; }
+    .alps-section__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .alps-kicker {
+      font-size: 10px;
       font-weight: 700;
       color: var(--alps-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 3px;
     }
-
-    .completion-bar {
-      width: 72px;
-      height: 5px;
-      background: var(--alps-bg);
-      border-radius: 3px;
-      overflow: hidden;
+    .alps-section__title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--alps-text);
+      margin: 0;
     }
+    .alps-section__right { flex-shrink: 0; }
+    .alps-section__body {}
 
-    .completion-bar-fill {
-      height: 100%;
-      background: var(--alps-accent);
-      transition: width 0.3s;
-    }
-
-    .btn {
+    .alps-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -237,89 +194,21 @@
       transition: all 0.15s;
       border: none;
     }
-
-    .btn-primary {
-      background: var(--alps-accent);
-      color: white;
-    }
-
-    .btn-primary:hover { background: #0a9fb5; }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--alps-text-muted);
-      border: 1px solid var(--alps-border) !important;
-    }
-
-    .btn-secondary:hover { color: var(--alps-text); border-color: var(--alps-text-muted) !important; }
-
-    .btn-danger {
-      background: transparent;
-      color: var(--alps-danger);
-      border: 1px solid var(--alps-danger) !important;
-    }
-
-    .btn-danger:hover { background: rgba(239, 68, 68, 0.1); }
-
-    .btn-success {
-      background: var(--alps-success);
-      color: white;
-    }
-
-    .btn-success:hover { background: #0ca678; }
-
-    .section-card {
-      background: var(--alps-bg-alt);
-      border: 1px solid var(--alps-border);
-      border-radius: 8px;
-      padding: 18px;
-      display: grid;
-      gap: 14px;
-    }
-
-    .section-kicker {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--alps-text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .section-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--alps-text);
-    }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 12px;
-    }
-
-    .editable-content {
-      padding: 8px 10px;
-      background: var(--alps-bg);
-      border-radius: 4px;
-      font-size: 12px;
-      color: var(--alps-text);
-      cursor: pointer;
-      min-height: 32px;
-      display: flex;
-      align-items: center;
-      border: 1px solid transparent;
-      transition: border-color 0.15s;
-    }
-
-    .editable-content:hover {
-      border-color: var(--alps-border);
-    }
+    .alps-btn--default  { background: var(--alps-bg); color: var(--alps-text); border: 1px solid var(--alps-border) !important; }
+    .alps-btn--default:hover { border-color: var(--alps-text-muted) !important; }
+    .alps-btn--primary  { background: var(--alps-accent); color: white; }
+    .alps-btn--primary:hover { background: #0a9fb5; }
+    .alps-btn--danger   { background: transparent; color: var(--alps-danger); border: 1px solid var(--alps-danger) !important; }
+    .alps-btn--danger:hover { background: rgba(239,68,68,0.1); }
+    .alps-btn--success  { background: var(--alps-success); color: white; }
+    .alps-btn--success:hover { background: #0ca678; }
+    .alps-btn--sm { padding: 4px 8px; font-size: 11px; }
+    .alps-btn--lg { padding: 10px 18px; font-size: 14px; }
+    .alps-btn__icon { display: flex; align-items: center; }
 
     select {
       font-family: var(--font-sans);
     }
-
     select:focus { outline: none; border-color: var(--alps-accent) !important; }
   </style>
 </head>
@@ -330,728 +219,13 @@
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
-  <script type="text/babel">
-    const { useState, useCallback } = React;
-
-    // ─── Data ──────────────────────────────────────────────────────────────────
-
-    const PROJECT = {
-      id: "ALI-42",
-      title: "Recurring Engine — Subscription Billing",
-      summary: "Build subscription and billing management system with retry logic, dunning emails, and customer portal",
-      requestor: "priya",
-      pm: "rina",
-      techLead: "mateo",
-      cycles: [
-        { id: "S11", name: "Sprint 11", startDate: "2026-03-23", endDate: "2026-04-05" },
-        { id: "S12", name: "Sprint 12", startDate: "2026-04-06", endDate: "2026-04-19" },
-        { id: "S13", name: "Sprint 13", startDate: "2026-04-20", endDate: "2026-05-03" },
-        { id: "S14", name: "Sprint 14", startDate: "2026-05-04", endDate: "2026-05-17" },
-      ],
-      gates: {
-        business: {
-          status: "cleared",
-          completion: 100,
-          owner: "priya",
-          dueDate: "Apr 10",
-          checklist: [
-            { id: "b1", label: "Business Case", content: "Clear ROI: $2M annual revenue uplift, 15% margin improvement through automated recovery.", status: "complete", aiSuggestion: null },
-            { id: "b2", label: "Success Metrics", content: "Payment success rate > 99.5%, churn reduction by 20%, dunning recovery rate > 35%.", status: "complete", aiSuggestion: null },
-            { id: "b3", label: "Stakeholders", content: "CFO (James Okafor), VP Product (Priya Menon), Head of Growth (Dana Vasquez).", status: "complete", aiSuggestion: null },
-            { id: "b4", label: "GTM / Rollout Plan", content: "Phased: Beta (10% users, Apr 28) → Stage (50%, May 10) → GA (100%, May 24).", status: "complete", aiSuggestion: null },
-          ],
-        },
-        product: {
-          status: "in_progress",
-          completion: 70,
-          owner: "maya",
-          dueDate: "Apr 25",
-          checklist: [
-            { id: "p1", label: "User Flow", content: "Customer initiates payment → Retry logic (exp backoff) → Success/failure notification → Dunning email sequence.", status: "complete", aiSuggestion: null },
-            { id: "p2", label: "Feature Breakdown", content: "Payment retry (exp backoff), dunning email sequence, billing dashboard UI, webhook fan-out.", status: "complete", aiSuggestion: null },
-            { id: "p3", label: "Acceptance Criteria", content: "", status: "warning", aiSuggestion: "Add criteria: handle mid-dunning upgrades, SLA for retry timing (< 2h between retries), customer notification within 5 min of failure." },
-            { id: "p4", label: "Edge Cases", content: "Customer cancels mid-process, timezone handling for dunning windows, partial refund during active retry.", status: "warning", aiSuggestion: null },
-          ],
-        },
-        tech: {
-          status: "locked",
-          completion: 20,
-          owner: "mateo",
-          dueDate: "May 5",
-          checklist: [
-            { id: "t1", label: "Technical Approach", content: "", status: "missing", aiSuggestion: "Consider queue-based retry (SQS/BullMQ), idempotent API design with idempotency keys, circuit breaker for payment provider." },
-            { id: "t2", label: "Dependencies", content: "Payment gateway API (Stripe v3), SendGrid for transactional emails, PostgreSQL migrations, Redis for retry queue.", status: "warning", aiSuggestion: null },
-            { id: "t3", label: "Constraints", content: "", status: "missing", aiSuggestion: "Define: max retry count (5), timeout windows (72h total), cost limits per failed invoice, GDPR data retention." },
-            { id: "t4", label: "Timeline Impact", content: "", status: "missing", aiSuggestion: null },
-          ],
-        },
-      },
-      changeLog: [
-        { gate: "business", action: "cleared", date: "2026-04-12", by: "rina", note: "All business criteria met. ROI confirmed by CFO." },
-        { gate: "product", action: "criteria_updated", date: "2026-04-20", by: "maya", note: "Added edge case: partial refund mid-retry." },
-        { gate: "product", action: "started", date: "2026-04-15", by: "rina", note: "Product gate review initiated." },
-      ],
-    };
-
-    const PEOPLE = {
-      you:   { fullName: "You",             initials: "JD" },
-      priya: { fullName: "Priya Menon",     initials: "PM" },
-      rina:  { fullName: "Rina Patel",      initials: "RP" },
-      maya:  { fullName: "Maya Chen",       initials: "MC" },
-      mateo: { fullName: "Mateo Rodriguez", initials: "MR" },
-      jun:   { fullName: "Jun Park",        initials: "JP" },
-      lena:  { fullName: "Lena Okafor",    initials: "LO" },
-    };
-
-    const LINEAR_TICKETS = {
-      "LIN-201": { id: "LIN-201", title: "Design payment retry state machine",       status: "done",        cycle: "S11", assignee: "rina",  priority: "high",     gate: "business" },
-      "LIN-202": { id: "LIN-202", title: "Set up database schema for billing",        status: "done",        cycle: "S11", assignee: "jun",   priority: "high",     gate: "business" },
-      "LIN-203": { id: "LIN-203", title: "Create billing service skeleton",           status: "done",        cycle: "S11", assignee: "jun",   priority: "high",     gate: "business" },
-      "LIN-204": { id: "LIN-204", title: "Auth & permissions for billing admin",      status: "done",        cycle: "S11", assignee: "lena",  priority: "medium",   gate: "business" },
-      "LIN-205": { id: "LIN-205", title: "Implement retry logic with exponential backoff", status: "in_progress", cycle: "S12", assignee: "jun",   priority: "high",     gate: "product" },
-      "LIN-206": { id: "LIN-206", title: "Build billing dashboard UI",                status: "in_progress", cycle: "S12", assignee: "lena",  priority: "high",     gate: "product" },
-      "LIN-207": { id: "LIN-207", title: "Email notifications for failed payments",   status: "done",        cycle: "S12", assignee: "lena",  priority: "medium",   gate: "product" },
-      "LIN-208": { id: "LIN-208", title: "Webhook fan-out to CRM/Analytics",          status: "blocked",     cycle: "S12", assignee: "jun",   priority: "high",     gate: "product", blockedBy: "Payments API v3 access — pending procurement approval" },
-      "LIN-209": { id: "LIN-209", title: "Dunning rules configuration",               status: "todo",        cycle: "S12", assignee: "jun",   priority: "medium",   gate: "product" },
-      "LIN-210": { id: "LIN-210", title: "Customer portal: subscription management",  status: "todo",        cycle: "S13", assignee: "lena",  priority: "high",     gate: "tech" },
-      "LIN-211": { id: "LIN-211", title: "Handle partial refunds during retry",       status: "todo",        cycle: "S13", assignee: "jun",   priority: "medium",   gate: "tech" },
-      "LIN-212": { id: "LIN-212", title: "Subscription cancellation mid-retry",       status: "blocked",     cycle: "S13", assignee: "jun",   priority: "medium",   gate: "tech", blockedBy: "Awaiting product spec from Maya" },
-      "LIN-213": { id: "LIN-213", title: "Cascading failure handling",                status: "todo",        cycle: "S13", assignee: "jun",   priority: "high",     gate: "tech" },
-      "LIN-214": { id: "LIN-214", title: "Load testing & performance tuning",         status: "todo",        cycle: "S14", assignee: "mateo", priority: "high",     gate: "tech" },
-      "LIN-215": { id: "LIN-215", title: "E2E tests for full billing flow",           status: "todo",        cycle: "S14", assignee: "lena",  priority: "high",     gate: "tech" },
-      "LIN-216": { id: "LIN-216", title: "Integration with Payments API v3",          status: "todo",        cycle: "S14", assignee: "jun",   priority: "critical", gate: "tech" },
-      "LIN-217": { id: "LIN-217", title: "Production readiness review",               status: "todo",        cycle: "S14", assignee: "mateo", priority: "high",     gate: "tech" },
-    };
-
-    const INITIAL_SUGGESTIONS = {
-      "sug-1": {
-        id: "sug-1",
-        ticketId: "LIN-205",
-        gateTarget: "tech",
-        type: "scope_update",
-        suggestion: "Add circuit breaker pattern to prevent cascading failures during payment retries. Suggest using Resilience4j or opossum library.",
-        rationale: "Based on 3 recent commits and dev discussion: retry storms during payment provider outages are a known risk.",
-        status: "pending_approval",
-        createdAt: "Apr 28, 10:14",
-      },
-      "sug-2": {
-        id: "sug-2",
-        ticketId: "LIN-208",
-        gateTarget: "product",
-        type: "unblock_strategy",
-        suggestion: "Unblock LIN-208 by using a mock Payments API v3 stub for integration tests while procurement is pending. Estimate 2-day workaround.",
-        rationale: "Ticket blocked 11 days. Discussion thread shows team waiting on procurement — mock stub would unblock UI and integration work.",
-        status: "pending_approval",
-        createdAt: "Apr 30, 09:41",
-      },
-    };
-
-    // ─── Helpers ───────────────────────────────────────────────────────────────
-
-    function hashColor(str) {
-      let h = 0;
-      for (let i = 0; i < (str || "").length; i++) {
-        h = ((h << 5) - h) + str.charCodeAt(i);
-        h = h & h;
-      }
-      return Math.abs(h) % 360;
-    }
-
-    // ─── Shared components ─────────────────────────────────────────────────────
-
-    function Avatar({ person, size = 24 }) {
-      const p = PEOPLE[person] || { initials: "?" };
-      const hue = hashColor(person);
-      return (
-        <div style={{
-          width: size, height: size, borderRadius: "4px",
-          background: `hsl(${hue}, 55%, 48%)`,
-          color: "white", display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: Math.round(size * 0.44), fontWeight: 700, flexShrink: 0,
-        }}>
-          {p.initials}
-        </div>
-      );
-    }
-
-    function SectionCard({ kicker, title, right, children }) {
-      return (
-        <div className="section-card">
-          <div className="section-header">
-            <div>
-              {kicker && <div className="section-kicker">{kicker}</div>}
-              <div className="section-title">{title}</div>
-            </div>
-            {right && <div>{right}</div>}
-          </div>
-          {children}
-        </div>
-      );
-    }
-
-    // ─── Suggestion card (isolated component to keep hooks at top level) ───────
-
-    function SuggestionCard({ sug, onApprove, onReject }) {
-      const [editText, setEditText]             = useState(sug.suggestion);
-      const [showRejectInput, setShowRejectInput] = useState(false);
-      const [rejectReason, setRejectReason]     = useState("");
-
-      const ticket = LINEAR_TICKETS[sug.ticketId];
-      const typeLabel = {
-        scope_update:        "Scope Update",
-        acceptance_criteria: "Acceptance Criteria",
-        unblock_strategy:    "Unblock Strategy",
-      }[sug.type] || sug.type;
-
-      return (
-        <div style={{
-          padding: "14px",
-          background: "rgba(245, 158, 11, 0.07)",
-          borderLeft: "3px solid var(--alps-warning)",
-          borderRadius: "4px",
-          display: "grid",
-          gap: "10px",
-        }}>
-          <div>
-            <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--alps-warning)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>
-              {typeLabel}
-            </div>
-            <div style={{ fontSize: "12px", fontWeight: 600, color: "var(--alps-text)", marginBottom: "3px" }}>
-              {ticket?.id}: {ticket?.title}
-            </div>
-            <div style={{ fontSize: "11px", color: "var(--alps-text-muted)" }}>{sug.rationale}</div>
-          </div>
-
-          <div>
-            <div style={{ fontSize: "10px", fontWeight: 600, color: "var(--alps-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>
-              Edit before deciding:
-            </div>
-            <textarea
-              value={editText}
-              onChange={(e) => setEditText(e.target.value)}
-              rows={3}
-              style={{
-                width: "100%", padding: "8px 10px",
-                background: "var(--alps-bg-alt)", border: "1px solid var(--alps-border)",
-                borderRadius: "4px", color: "var(--alps-text)", fontSize: "12px",
-                fontFamily: "var(--font-sans)", resize: "vertical", outline: "none",
-              }}
-            />
-          </div>
-
-          {showRejectInput && (
-            <textarea
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              rows={2}
-              placeholder="Feedback for AI agent..."
-              style={{
-                width: "100%", padding: "8px 10px",
-                background: "var(--alps-bg-alt)", border: "1px solid var(--alps-border)",
-                borderRadius: "4px", color: "var(--alps-text)", fontSize: "12px",
-                fontFamily: "var(--font-sans)", resize: "none", outline: "none",
-              }}
-            />
-          )}
-
-          <div style={{ display: "flex", gap: "6px" }}>
-            <button
-              className="btn btn-success"
-              style={{ flex: 1, justifyContent: "center" }}
-              onClick={() => onApprove(sug.id, editText)}
-            >
-              ✓ Approve
-            </button>
-
-            {!showRejectInput ? (
-              <button
-                className="btn btn-danger"
-                style={{ flex: 1, justifyContent: "center" }}
-                onClick={() => setShowRejectInput(true)}
-              >
-                ✗ Reject
-              </button>
-            ) : (
-              <>
-                <button
-                  className="btn btn-danger"
-                  style={{ flex: 1, justifyContent: "center", background: "var(--alps-danger)", color: "white", border: "none !important" }}
-                  onClick={() => {
-                    if (rejectReason.trim()) {
-                      onReject(sug.id, rejectReason);
-                      setShowRejectInput(false);
-                    }
-                  }}
-                >
-                  Send
-                </button>
-                <button
-                  className="btn btn-secondary"
-                  style={{ flex: 1, justifyContent: "center" }}
-                  onClick={() => setShowRejectInput(false)}
-                >
-                  Cancel
-                </button>
-              </>
-            )}
-          </div>
-
-          <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", display: "flex", justifyContent: "space-between" }}>
-            <span>→ {sug.gateTarget} gate</span>
-            <span>{sug.createdAt}</span>
-          </div>
-        </div>
-      );
-    }
-
-    // ─── Validation gate components ────────────────────────────────────────────
-
-    function GateChecklist({ gateId, gate, onUpdateItem, onAcceptAI }) {
-      const statusIcon = (s) => s === "complete" ? "✅" : s === "warning" ? "⚠️" : "⬜";
-
-      return (
-        <div style={{ display: "grid", gap: "10px" }}>
-          <div style={{ display: "flex", gap: "16px", fontSize: "11px", color: "var(--alps-text-muted)", paddingBottom: "4px" }}>
-            <span>Owner: <strong style={{ color: "var(--alps-text)" }}>{PEOPLE[gate.owner]?.fullName || gate.owner}</strong></span>
-            <span>Due: <strong style={{ color: "var(--alps-text)" }}>{gate.dueDate}</strong></span>
-          </div>
-
-          {gate.checklist.map((item) => (
-            <div key={item.id} className={`checklist-item ${item.status}`}>
-              <div className="checklist-item-header">
-                <span style={{ fontSize: 14 }}>{statusIcon(item.status)}</span>
-                <span className="checklist-item-label">{item.label}</span>
-              </div>
-
-              <div className="checklist-item-content">
-                {item.content ? (
-                  <div
-                    className="editable-content"
-                    onClick={() => {
-                      const input = prompt(`Edit "${item.label}":`, item.content);
-                      if (input !== null) onUpdateItem(gateId, item.id, input);
-                    }}
-                    title="Click to edit"
-                  >
-                    {item.content}
-                  </div>
-                ) : (
-                  <textarea
-                    placeholder={`Add ${item.label.toLowerCase()}…`}
-                    defaultValue=""
-                    onBlur={(e) => onUpdateItem(gateId, item.id, e.target.value)}
-                  />
-                )}
-              </div>
-
-              {item.aiSuggestion && (
-                <div className="ai-suggestion">
-                  <div className="ai-suggestion-label">✨ AI Suggestion</div>
-                  <div className="ai-suggestion-text">{item.aiSuggestion}</div>
-                  <div className="ai-suggestion-actions">
-                    <button onClick={() => onAcceptAI(gateId, item.id)}>Accept</button>
-                    <button onClick={() => onUpdateItem(gateId, item.id, "", true)}>Ignore</button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    // ─── Main App ──────────────────────────────────────────────────────────────
-
-    function App() {
-      const [role, setRole]                 = useState("pm");
-      const [suggestions, setSuggestions]   = useState(INITIAL_SUGGESTIONS);
-      const [expandedGate, setExpandedGate] = useState("business");
-      const [project, setProject]           = useState(PROJECT);
-      const [editingProject, setEditingProject] = useState(false);
-      const [editTitle, setEditTitle]       = useState(PROJECT.title);
-      const [editSummary, setEditSummary]   = useState(PROJECT.summary);
-
-      const allTickets     = Object.values(LINEAR_TICKETS);
-      const doneCount      = allTickets.filter(t => t.status === "done").length;
-      const inProgCount    = allTickets.filter(t => t.status === "in_progress").length;
-      const blockedCount   = allTickets.filter(t => t.status === "blocked").length;
-      const todoCount      = allTickets.filter(t => t.status === "todo").length;
-      const totalCount     = allTickets.length;
-
-      const pendingSuggestions  = Object.values(suggestions).filter(s => s.status === "pending_approval");
-      const approvedSuggestions = Object.values(suggestions).filter(s => s.status === "approved");
-      const rejectedSuggestions = Object.values(suggestions).filter(s => s.status === "rejected");
-
-      const handleApprove = useCallback((sugId, editedContent) => {
-        setSuggestions(prev => {
-          const next = { ...prev };
-          if (next[sugId]) {
-            next[sugId] = { ...next[sugId], status: "approved", suggestion: editedContent, approvedAt: new Date().toLocaleString() };
-          }
-          return next;
-        });
-      }, []);
-
-      const handleReject = useCallback((sugId, reason) => {
-        setSuggestions(prev => {
-          const next = { ...prev };
-          if (next[sugId]) {
-            next[sugId] = { ...next[sugId], status: "rejected", rejectionReason: reason, rejectedAt: new Date().toLocaleString() };
-          }
-          return next;
-        });
-      }, []);
-
-      const handleUpdateGateItem = useCallback((gateId, itemId, newContent, clearAI = false) => {
-        setProject(prev => {
-          const next = { ...prev };
-          const gate = { ...next.gates[gateId] };
-          gate.checklist = gate.checklist.map(item => {
-            if (item.id !== itemId) return item;
-            const updated = { ...item, content: newContent };
-            if (clearAI) updated.aiSuggestion = null;
-            if (newContent.trim()) updated.status = "complete";
-            return updated;
-          });
-          const done = gate.checklist.filter(i => i.status === "complete").length;
-          gate.completion = Math.round((done / gate.checklist.length) * 100);
-          next.gates = { ...next.gates, [gateId]: gate };
-          return next;
-        });
-      }, []);
-
-      const handleAcceptAI = useCallback((gateId, itemId) => {
-        setProject(prev => {
-          const next = { ...prev };
-          const gate = { ...next.gates[gateId] };
-          gate.checklist = gate.checklist.map(item => {
-            if (item.id !== itemId) return item;
-            return { ...item, content: item.aiSuggestion, status: "complete", aiSuggestion: null };
-          });
-          const done = gate.checklist.filter(i => i.status === "complete").length;
-          gate.completion = Math.round((done / gate.checklist.length) * 100);
-          next.gates = { ...next.gates, [gateId]: gate };
-          return next;
-        });
-      }, []);
-
-      const getGateStatusDisplay = (status) => {
-        if (status === "cleared")     return { label: "✓ Cleared",     className: "complete"    };
-        if (status === "in_progress") return { label: "→ In Progress", className: "in-progress" };
-        return { label: "○ Locked", className: "locked" };
-      };
-
-      const gateLabels = { business: "Business Gate", product: "Product Gate", tech: "Tech Gate" };
-
-      return (
-        <div className="alps-app">
-          {/* Header */}
-          <header className="alps-header">
-            <div style={{ display: "flex", alignItems: "center", gap: "24px", flex: 1 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={{ width: "26px", height: "26px", borderRadius: "5px", background: "var(--alps-primary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 800, color: "white" }}>A</div>
-                <div style={{ fontSize: "15px", fontWeight: 700, letterSpacing: "-0.01em" }}>ALPS</div>
-              </div>
-              <div style={{ width: "1px", height: "20px", background: "var(--alps-border)" }}></div>
-              <nav style={{ display: "flex", gap: "2px" }}>
-                {[
-                  { id: "dashboard", label: "Dashboard" },
-                  { id: "portfolio", label: "Portfolio" },
-                ].map(item => (
-                  <button
-                    key={item.id}
-                    style={{
-                      padding: "7px 12px", background: item.id === "dashboard" ? "var(--alps-accent)" : "transparent",
-                      color: item.id === "dashboard" ? "white" : "var(--alps-text-muted)",
-                      border: "none", borderRadius: "4px", cursor: "pointer",
-                      fontSize: "12px", fontWeight: item.id === "dashboard" ? 600 : 400,
-                      fontFamily: "var(--font-sans)",
-                    }}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </nav>
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                style={{
-                  padding: "6px 10px", background: "var(--alps-bg)",
-                  border: "1px solid var(--alps-border)", borderRadius: "4px",
-                  color: "var(--alps-text)", fontSize: "12px", fontWeight: 600, cursor: "pointer",
-                }}
-              >
-                <option value="requestor">Requestor</option>
-                <option value="pm">PM</option>
-                <option value="developer">Developer</option>
-                <option value="techLead">Tech Lead</option>
-                <option value="manager">Manager</option>
-              </select>
-              <Avatar person="you" size={30} />
-            </div>
-          </header>
-
-          {/* Main content */}
-          <main className="alps-main">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "20px", alignItems: "start", maxWidth: "1400px", margin: "0 auto" }}>
-
-              {/* LEFT COLUMN */}
-              <div style={{ display: "grid", gap: "16px" }}>
-
-                {/* Project Info */}
-                <SectionCard
-                  kicker={project.id}
-                  title={editingProject ? null : project.title}
-                  right={
-                    editingProject ? null : (
-                      <button className="btn btn-secondary" onClick={() => setEditingProject(true)}>
-                        ✎ Edit
-                      </button>
-                    )
-                  }
-                >
-                  {editingProject ? (
-                    <div style={{ display: "grid", gap: "10px" }}>
-                      <input
-                        value={editTitle}
-                        onChange={e => setEditTitle(e.target.value)}
-                        style={{ padding: "8px 10px", background: "var(--alps-bg)", border: "1px solid var(--alps-border)", borderRadius: "4px", color: "var(--alps-text)", fontSize: "14px", fontWeight: 700, fontFamily: "var(--font-sans)", outline: "none" }}
-                      />
-                      <textarea
-                        value={editSummary}
-                        onChange={e => setEditSummary(e.target.value)}
-                        rows={2}
-                        style={{ padding: "8px 10px", background: "var(--alps-bg)", border: "1px solid var(--alps-border)", borderRadius: "4px", color: "var(--alps-text)", fontSize: "12px", fontFamily: "var(--font-sans)", resize: "none", outline: "none" }}
-                      />
-                      <div style={{ display: "flex", gap: "8px" }}>
-                        <button className="btn btn-primary" onClick={() => { setProject(p => ({ ...p, title: editTitle, summary: editSummary })); setEditingProject(false); }}>Save</button>
-                        <button className="btn btn-secondary" onClick={() => { setEditTitle(project.title); setEditSummary(project.summary); setEditingProject(false); }}>Cancel</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div style={{ fontSize: "12px", color: "var(--alps-text-muted)", lineHeight: 1.5 }}>{project.summary}</div>
-                      <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginTop: "4px" }}>
-                        {[
-                          { label: "Requestor", key: project.requestor },
-                          { label: "PM",        key: project.pm },
-                          { label: "Tech Lead", key: project.techLead },
-                        ].map(({ label, key }) => (
-                          <div key={label}>
-                            <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "5px" }}>{label}</div>
-                            <div style={{ display: "flex", alignItems: "center", gap: "7px" }}>
-                              <Avatar person={key} size={20} />
-                              <span style={{ fontSize: "12px" }}>{PEOPLE[key]?.fullName}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </SectionCard>
-
-                {/* Ticket Status */}
-                <SectionCard kicker="Progress" title="Ticket Status">
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ fontSize: "13px", fontWeight: 600 }}>
-                      {doneCount}/{totalCount} tickets complete
-                    </div>
-                    <div style={{ display: "flex", gap: "12px", fontSize: "11px", color: "var(--alps-text-muted)" }}>
-                      <span><span style={{ color: "var(--alps-success)" }}>●</span> {doneCount}</span>
-                      <span><span style={{ color: "var(--alps-accent)" }}>●</span> {inProgCount}</span>
-                      <span><span style={{ color: "var(--alps-danger)" }}>●</span> {blockedCount}</span>
-                    </div>
-                  </div>
-
-                  <div style={{ height: "6px", background: "var(--alps-bg)", borderRadius: "3px", overflow: "hidden" }}>
-                    <div style={{ height: "100%", width: `${Math.round(doneCount / totalCount * 100)}%`, background: "var(--alps-success)", transition: "width 0.3s" }}></div>
-                  </div>
-
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "10px" }}>
-                    {[
-                      { label: "DONE",    count: doneCount,    color: "var(--alps-success)"    },
-                      { label: "IN PROG", count: inProgCount,  color: "var(--alps-accent)"     },
-                      { label: "BLOCKED", count: blockedCount, color: "var(--alps-danger)"     },
-                      { label: "TODO",    count: todoCount,    color: "var(--alps-text-muted)" },
-                    ].map(({ label, count, color }) => (
-                      <div key={label} style={{ padding: "12px", background: "var(--alps-bg)", borderRadius: "4px", borderLeft: `3px solid ${color}` }}>
-                        <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "4px" }}>{label}</div>
-                        <div style={{ fontSize: "22px", fontWeight: 700, color }}>{count}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <button
-                    className="btn btn-primary"
-                    style={{ width: "100%", justifyContent: "center", padding: "10px" }}
-                    onClick={() => window.open("Progress.html", "_blank")}
-                  >
-                    View Progress &amp; Cycles →
-                  </button>
-                </SectionCard>
-
-                {/* Validation Gates */}
-                <div>
-                  <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--alps-text)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "12px" }}>
-                    Validation Gates
-                  </div>
-
-                  {["business", "product", "tech"].map((gateId) => {
-                    const gate = project.gates[gateId];
-                    const isExpanded = expandedGate === gateId;
-                    const statusDisplay = getGateStatusDisplay(gate.status);
-
-                    return (
-                      <div key={gateId} className="gate-card">
-                        <div
-                          className={`gate-card-header ${isExpanded ? "expanded" : ""}`}
-                          onClick={() => setExpandedGate(isExpanded ? null : gateId)}
-                        >
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: "13px", fontWeight: 600 }}>{gateLabels[gateId]}</div>
-                          </div>
-
-                          <div className={`gate-status-badge ${statusDisplay.className}`}>
-                            {statusDisplay.label}
-                          </div>
-
-                          <div className="completion-bar-wrap">
-                            <div className="completion-bar">
-                              <div className="completion-bar-fill" style={{ width: `${gate.completion}%` }}></div>
-                            </div>
-                            <span>{gate.completion}%</span>
-                          </div>
-
-                          <div style={{ fontSize: "12px", color: "var(--alps-text-muted)", marginLeft: "4px", transform: isExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>▼</div>
-                        </div>
-
-                        {isExpanded && (
-                          <div className="gate-card-body">
-                            <GateChecklist
-                              gateId={gateId}
-                              gate={gate}
-                              onUpdateItem={handleUpdateGateItem}
-                              onAcceptAI={handleAcceptAI}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Change Log */}
-                <SectionCard kicker="Audit Trail" title="Gate Change Log">
-                  <div style={{ display: "grid", gap: "8px" }}>
-                    {project.changeLog.length === 0 ? (
-                      <div style={{ fontSize: "12px", color: "var(--alps-text-muted)", padding: "8px 0" }}>No changes yet.</div>
-                    ) : (
-                      project.changeLog.map((entry, i) => (
-                        <div key={i} style={{ padding: "10px 12px", background: "var(--alps-bg)", borderRadius: "4px", borderLeft: "3px solid var(--alps-info)", fontSize: "12px" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                              <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--alps-info)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{entry.gate} Gate</span>
-                              <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--alps-accent)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{entry.action.replace(/_/g, " ")}</span>
-                            </div>
-                            <span style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontFamily: "var(--font-mono)" }}>{entry.date}</span>
-                          </div>
-                          <div style={{ fontSize: "11px", color: "var(--alps-text-muted)", marginBottom: "4px" }}>{entry.note}</div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                            <Avatar person={entry.by} size={14} />
-                            <span style={{ fontSize: "10px", color: "var(--alps-text-muted)" }}>{PEOPLE[entry.by]?.fullName}</span>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </SectionCard>
-              </div>
-
-              {/* RIGHT COLUMN — AI Suggestions (sticky) */}
-              <div style={{ position: "sticky", top: "74px", display: "grid", gap: "16px" }}>
-
-                {/* Pending */}
-                {pendingSuggestions.length > 0 && (
-                  <SectionCard
-                    kicker={`${pendingSuggestions.length} pending`}
-                    title="AI Suggestions"
-                    right={<span style={{ fontSize: "10px", fontWeight: 700, color: "var(--alps-warning)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Needs Review</span>}
-                  >
-                    <div style={{ display: "grid", gap: "12px" }}>
-                      {pendingSuggestions.map(sug => (
-                        <SuggestionCard
-                          key={sug.id}
-                          sug={sug}
-                          onApprove={handleApprove}
-                          onReject={handleReject}
-                        />
-                      ))}
-                    </div>
-                  </SectionCard>
-                )}
-
-                {/* Applied */}
-                {approvedSuggestions.length > 0 && (
-                  <SectionCard
-                    kicker={`${approvedSuggestions.length} applied`}
-                    title="Applied to Gates"
-                    right={<span style={{ fontSize: "12px", color: "var(--alps-success)" }}>✓</span>}
-                  >
-                    <div style={{ display: "grid", gap: "8px" }}>
-                      {approvedSuggestions.map(sug => (
-                        <div key={sug.id} style={{ padding: "10px 12px", background: "var(--alps-bg)", borderRadius: "4px", borderLeft: "3px solid var(--alps-success)", display: "grid", gap: "4px" }}>
-                          <div style={{ fontSize: "11px", fontWeight: 600 }}>
-                            {LINEAR_TICKETS[sug.ticketId]?.id} → {sug.gateTarget} gate
-                          </div>
-                          <div style={{ fontSize: "11px", color: "var(--alps-text-muted)", lineHeight: 1.45 }}>{sug.suggestion}</div>
-                          <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontFamily: "var(--font-mono)" }}>{sug.approvedAt}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </SectionCard>
-                )}
-
-                {/* Rejected */}
-                {rejectedSuggestions.length > 0 && (
-                  <SectionCard
-                    kicker={`${rejectedSuggestions.length} rejected`}
-                    title="Rejected — Feedback Sent"
-                  >
-                    <div style={{ display: "grid", gap: "8px" }}>
-                      {rejectedSuggestions.map(sug => (
-                        <div key={sug.id} style={{ padding: "10px 12px", background: "var(--alps-bg)", borderRadius: "4px", borderLeft: "3px solid var(--alps-danger)", display: "grid", gap: "4px" }}>
-                          <div style={{ fontSize: "11px", fontWeight: 600 }}>
-                            {LINEAR_TICKETS[sug.ticketId]?.id}
-                          </div>
-                          <div style={{ fontSize: "11px", color: "var(--alps-text-muted)", fontStyle: "italic", lineHeight: 1.45 }}>"{sug.rejectionReason}"</div>
-                          <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontFamily: "var(--font-mono)" }}>{sug.rejectedAt}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </SectionCard>
-                )}
-
-                {/* Empty state when no suggestions */}
-                {pendingSuggestions.length === 0 && approvedSuggestions.length === 0 && rejectedSuggestions.length === 0 && (
-                  <SectionCard kicker="AI Agent" title="Suggestions">
-                    <div style={{ fontSize: "12px", color: "var(--alps-text-muted)", padding: "8px 0", lineHeight: 1.6 }}>
-                      No suggestions pending. The AI agent will surface insights as development activity progresses.
-                    </div>
-                  </SectionCard>
-                )}
-
-              </div>
-            </div>
-          </main>
-        </div>
-      );
-    }
-
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(<App />);
-  </script>
+  <!-- Load order: data → utils → primitives → screens → app shell -->
+  <script type="text/babel" src="data.jsx"></script>
+  <script type="text/babel" src="utils.jsx"></script>
+  <script type="text/babel" src="primitives.jsx"></script>
+  <script type="text/babel" src="screen-dashboard.jsx"></script>
+  <script type="text/babel" src="screen-portfolio.jsx"></script>
+  <script type="text/babel" src="screen-cycles.jsx"></script>
+  <script type="text/babel" src="app.jsx"></script>
 </body>
 </html>

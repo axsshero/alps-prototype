@@ -1,0 +1,9 @@
+services:
+  alps:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./project:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
