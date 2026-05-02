@@ -7,7 +7,7 @@ This is a **handoff bundle** from Claude Design (claude.ai/design).
 ## 🚀 Quick Start
 
 ### View Online (GitHub Pages)
-Once deployed, visit: `https://<your-username>.github.io/<repo-name>/`
+Visit: `https://axsshero.github.io/alps-prototype/`
 
 See [GITHUB_PAGES_SETUP.md](GITHUB_PAGES_SETUP.md) for deployment instructions.
 
