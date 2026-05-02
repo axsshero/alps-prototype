@@ -27,10 +27,20 @@ jobs:
     - name: Setup Pages
       uses: actions/configure-pages@v4
     
+    - name: Prepare deployment files
+      run: |
+        # Copy all files from project/ to a temporary deploy directory
+        mkdir -p _deploy
+        cp -r project/* _deploy/
+        # Rename alps-prototype.html to index.html (overwrite the redirect)
+        if [ -f "_deploy/alps-prototype.html" ]; then
+          mv "_deploy/alps-prototype.html" _deploy/index.html
+        fi
+    
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: './project'
+        path: './_deploy'
     
     - name: Deploy to GitHub Pages
       id: deployment
