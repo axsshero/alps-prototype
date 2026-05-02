@@ -82,6 +82,7 @@ const SPRINTS = [
   {
     id: "sprint-1",
     name: "Sprint 1 — Foundation",
+    description: "Establish core infrastructure for payment summary migration: React component scaffolding, API endpoint design, and authentication framework. Focus on architectural foundations that enable rapid feature development in subsequent sprints.",
     cycle: "Q2 2026",
     projectId: "ALPS-301",
     status: "completed",
@@ -93,6 +94,7 @@ const SPRINTS = [
   {
     id: "sprint-2",
     name: "Sprint 2 — Core Logic",
+    description: "Implement retry logic with exponential backoff, build billing dashboard UI, and establish webhook fan-out architecture. Primary goal: deliver end-to-end payment retry flow with real-time status visibility.",
     cycle: "Q2 2026",
     projectId: "ALPS-218",
     status: "in_progress",
@@ -104,6 +106,7 @@ const SPRINTS = [
   {
     id: "sprint-3",
     name: "Sprint 3 — Retry & Edge Cases",
+    description: "Handle edge cases: partial refunds during retry, subscription cancellations mid-retry, cascading failure prevention. Includes load testing to validate system resilience under high concurrency.",
     cycle: "Q3 2026",
     projectId: "ALPS-218",
     status: "planned",
@@ -115,6 +118,7 @@ const SPRINTS = [
   {
     id: "sprint-4",
     name: "Sprint 4 — Integration & Testing",
+    description: "Complete integration with Payments API v3, implement end-to-end testing suite, and conduct production readiness review. Focus on security audit, monitoring setup, and deployment preparation.",
     cycle: "Q3 2026",
     projectId: "ALPS-218",
     status: "planned",
@@ -126,6 +130,7 @@ const SPRINTS = [
   {
     id: "sprint-5",
     name: "Sprint 5 — Express Payment Migration",
+    description: "Migrate payment summary HTML to React components, build API endpoints replacing PHP logic, and integrate A/B testing framework. Deliver production-ready React payment flow with feature flag controls.",
     cycle: "Q3 2026",
     projectId: "ALPS-301",
     status: "in_progress",
@@ -723,6 +728,149 @@ const INITIAL_SUGGESTIONS = {
   },
 };
 
+// Project-level attachments
+const PROJECT_ATTACHMENTS = {
+  "ALPS-218": [
+    {
+      id: "att-proj-218-1",
+      name: "business-case-recurring-billing.pdf",
+      type: "PDF",
+      size: "1.8 MB",
+      uploadedBy: "rina",
+      uploadedAt: "3 weeks ago",
+      url: "#"
+    },
+    {
+      id: "att-proj-218-2",
+      name: "architecture-diagram.figma",
+      type: "Figma",
+      size: "—",
+      uploadedBy: "mateo",
+      uploadedAt: "2 weeks ago",
+      url: "#"
+    },
+    {
+      id: "att-proj-218-3",
+      name: "stakeholder-approval-email.pdf",
+      type: "PDF",
+      size: "340 KB",
+      uploadedBy: "asha",
+      uploadedAt: "1 week ago",
+      url: "#"
+    }
+  ],
+  "ALPS-301": [
+    {
+      id: "att-proj-301-1",
+      name: "php-to-react-migration-plan.md",
+      type: "Markdown",
+      size: "28 KB",
+      uploadedBy: "mateo",
+      uploadedAt: "5 days ago",
+      url: "#"
+    },
+    {
+      id: "att-proj-301-2",
+      name: "payment-flow-wireframes.figma",
+      type: "Figma",
+      size: "—",
+      uploadedBy: "lena",
+      uploadedAt: "3 days ago",
+      url: "#"
+    }
+  ]
+};
+
+// Gate-level attachments (composite key: projectId-gateId)
+const GATE_ATTACHMENTS = {
+  "ALPS-218-business": [
+    {
+      id: "att-gate-218-b1",
+      name: "roi-analysis-spreadsheet.xlsx",
+      type: "Excel",
+      size: "512 KB",
+      uploadedBy: "rina",
+      uploadedAt: "3 weeks ago",
+      url: "#"
+    },
+    {
+      id: "att-gate-218-b2",
+      name: "stakeholder-sign-off.pdf",
+      type: "PDF",
+      size: "890 KB",
+      uploadedBy: "asha",
+      uploadedAt: "2 weeks ago",
+      url: "#"
+    }
+  ],
+  "ALPS-218-product": [
+    {
+      id: "att-gate-218-p1",
+      name: "user-flow-diagram.png",
+      type: "Image",
+      size: "1.2 MB",
+      uploadedBy: "rina",
+      uploadedAt: "1 week ago",
+      url: "#"
+    },
+    {
+      id: "att-gate-218-p2",
+      name: "acceptance-criteria-v2.md",
+      type: "Markdown",
+      size: "18 KB",
+      uploadedBy: "rina",
+      uploadedAt: "4 days ago",
+      url: "#"
+    }
+  ],
+  "ALPS-301-business": [
+    {
+      id: "att-gate-301-b1",
+      name: "conversion-rate-analysis.pdf",
+      type: "PDF",
+      size: "2.1 MB",
+      uploadedBy: "priya",
+      uploadedAt: "1 week ago",
+      url: "#"
+    }
+  ]
+};
+
+// Sprint-level attachments
+const SPRINT_ATTACHMENTS = {
+  "sprint-2": [
+    {
+      id: "att-sprint-2-1",
+      name: "sprint-2-planning-notes.md",
+      type: "Markdown",
+      size: "12 KB",
+      uploadedBy: "mateo",
+      uploadedAt: "2 weeks ago",
+      url: "#"
+    },
+    {
+      id: "att-sprint-2-2",
+      name: "retrospective-action-items.pdf",
+      type: "PDF",
+      size: "450 KB",
+      uploadedBy: "rina",
+      uploadedAt: "1 week ago",
+      url: "#"
+    }
+  ],
+  "sprint-3": [
+    {
+      id: "att-sprint-3-1",
+      name: "edge-case-scenarios.xlsx",
+      type: "Excel",
+      size: "780 KB",
+      uploadedBy: "jun",
+      uploadedAt: "3 days ago",
+      url: "#"
+    }
+  ]
+};
+
 Object.assign(window, {
   PEOPLE,
   PROJECT,
@@ -733,4 +881,11 @@ Object.assign(window, {
   DISCUSSION_THREAD,
   CYCLES,
   INITIAL_SUGGESTIONS,
+  PROJECT_ATTACHMENTS,
+  GATE_ATTACHMENTS,
+  SPRINT_ATTACHMENTS,
+  TICKET_ATTACHMENTS,
+  TICKET_GITLAB_ACTIVITY,
+  TICKET_DISCUSSIONS,
+  TICKET_AI_SUGGESTIONS,
 });

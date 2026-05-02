@@ -132,6 +132,13 @@ function Sprint_Card({ sprint, health, onViewProject, expanded, onToggleExpand }
         </div>
       )}
 
+      {/* Sprint description */}
+      {sprint.description && (
+        <div style={{ marginTop: "2px" }}>
+          <window.Sprint_Description description={sprint.description} />
+        </div>
+      )}
+
       {/* Date range */}
       <div style={{ fontSize: "11px", color: "var(--alps-text-muted)" }}>
         {sprint.status === "planned"     && <span>Starts: <strong style={{ color: "var(--alps-text)" }}>{sprint.startDate}</strong></span>}
@@ -183,6 +190,24 @@ function Sprint_Card({ sprint, health, onViewProject, expanded, onToggleExpand }
               )}
             </div>
           )}
+
+          {/* Sprint Attachments */}
+          <div style={{ marginTop: "4px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--alps-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>
+              Sprint Attachments
+            </div>
+            <window.Attachment_List
+              attachments={window.SPRINT_ATTACHMENTS?.[sprint.id] || []}
+              emptyMessage="No sprint attachments"
+              compact={true}
+            />
+            <div style={{ marginTop: "8px" }}>
+              <window.Attachment_Upload_Placeholder
+                entityType="sprint"
+                entityId={sprint.id}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

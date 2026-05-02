@@ -110,26 +110,104 @@ function GateChecklist({ gateId, gate, onUpdateItem, onAcceptAI }) {
 
 function GateContentBusiness({ project, onUpdateItem, onAcceptAI }) {
   const gate = project.gates.business;
+  const gateKey = `${project.id}-business`;
+  
   if (!gate.checklist) {
     return <div style={{ fontSize: "12px", color: "var(--alps-text-muted)" }}>Status: {gate.status} · {gate.completeness}% complete</div>;
   }
-  return <GateChecklist gateId="business" gate={gate} onUpdateItem={onUpdateItem} onAcceptAI={onAcceptAI} />;
+  
+  return (
+    <div style={{ display: "grid", gap: "16px" }}>
+      {/* Existing checklist */}
+      <GateChecklist gateId="business" gate={gate} onUpdateItem={onUpdateItem} onAcceptAI={onAcceptAI} />
+      
+      {/* Gate attachments */}
+      <div style={{ marginTop: "8px" }}>
+        <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--alps-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>
+          Gate Attachments
+        </div>
+        <window.Attachment_List
+          attachments={window.GATE_ATTACHMENTS?.[gateKey] || []}
+          emptyMessage="No gate attachments"
+          compact={true}
+        />
+        <div style={{ marginTop: "8px" }}>
+          <window.Attachment_Upload_Placeholder
+            entityType="gate"
+            entityId={gateKey}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function GateContentProduct({ project, onUpdateItem, onAcceptAI }) {
   const gate = project.gates.product;
+  const gateKey = `${project.id}-product`;
+  
   if (!gate.checklist) {
     return <div style={{ fontSize: "12px", color: "var(--alps-text-muted)" }}>Status: {gate.status} · {gate.completeness}% complete</div>;
   }
-  return <GateChecklist gateId="product" gate={gate} onUpdateItem={onUpdateItem} onAcceptAI={onAcceptAI} />;
+  
+  return (
+    <div style={{ display: "grid", gap: "16px" }}>
+      {/* Existing checklist */}
+      <GateChecklist gateId="product" gate={gate} onUpdateItem={onUpdateItem} onAcceptAI={onAcceptAI} />
+      
+      {/* Gate attachments */}
+      <div style={{ marginTop: "8px" }}>
+        <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--alps-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>
+          Gate Attachments
+        </div>
+        <window.Attachment_List
+          attachments={window.GATE_ATTACHMENTS?.[gateKey] || []}
+          emptyMessage="No gate attachments"
+          compact={true}
+        />
+        <div style={{ marginTop: "8px" }}>
+          <window.Attachment_Upload_Placeholder
+            entityType="gate"
+            entityId={gateKey}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function GateContentTech({ project, onUpdateItem, onAcceptAI }) {
   const gate = project.gates.tech;
+  const gateKey = `${project.id}-tech`;
+  
   if (!gate.checklist) {
     return <div style={{ fontSize: "12px", color: "var(--alps-text-muted)" }}>Status: {gate.status} · {gate.completeness}% complete</div>;
   }
-  return <GateChecklist gateId="tech" gate={gate} onUpdateItem={onUpdateItem} onAcceptAI={onAcceptAI} />;
+  
+  return (
+    <div style={{ display: "grid", gap: "16px" }}>
+      {/* Existing checklist */}
+      <GateChecklist gateId="tech" gate={gate} onUpdateItem={onUpdateItem} onAcceptAI={onAcceptAI} />
+      
+      {/* Gate attachments */}
+      <div style={{ marginTop: "8px" }}>
+        <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--alps-text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>
+          Gate Attachments
+        </div>
+        <window.Attachment_List
+          attachments={window.GATE_ATTACHMENTS?.[gateKey] || []}
+          emptyMessage="No gate attachments"
+          compact={true}
+        />
+        <div style={{ marginTop: "8px" }}>
+          <window.Attachment_Upload_Placeholder
+            entityType="gate"
+            entityId={gateKey}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ─── AI suggestion card (isolated so hooks stay at top level) ─────────────────
@@ -342,6 +420,20 @@ function DashboardScreen({ role, suggestions, onSuggestionUpdate, activeProjectI
                   </div>
                 </div>
               ))}
+            </div>
+          </window.Section>
+
+          {/* Project Attachments */}
+          <window.Section kicker="Documentation" title="Project Attachments">
+            <div style={{ display: "grid", gap: "12px" }}>
+              <window.Attachment_List
+                attachments={window.PROJECT_ATTACHMENTS[project.id] || []}
+                emptyMessage="No project attachments"
+              />
+              <window.Attachment_Upload_Placeholder
+                entityType="project"
+                entityId={project.id}
+              />
             </div>
           </window.Section>
 
