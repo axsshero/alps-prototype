@@ -1,6 +1,9 @@
 # Kiro workspace folder (keep local only)
 .kiro/
 
+# Chats folder (keep local only)
+chats/
+
 # Node modules
 node_modules/
 
