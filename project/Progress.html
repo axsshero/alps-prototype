@@ -19,6 +19,16 @@
       --alps-border: #374151;
       --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
+
+    /* Light mode theme */
+    .alps-app.light {
+      --alps-bg: #ffffff;
+      --alps-bg-alt: #f8f9fa;
+      --alps-bg-hover: #e9ecef;
+      --alps-text: #1a1a1a;
+      --alps-text-muted: #6c757d;
+      --alps-border: #dee2e6;
+    }
     * { box-sizing: border-box; }
     body, html { margin: 0; padding: 0; font-family: var(--font-sans); }
     .alps-app { background: var(--alps-bg); color: var(--alps-text); min-height: 100vh; display: flex; flex-direction: column; }
@@ -34,6 +44,36 @@
       font-size: 12px; font-weight: 600; transition: all 0.2s;
     }
     .button-secondary:hover { color: var(--alps-text); border-color: var(--alps-text); }
+    
+    .theme-toggle {
+      display: flex;
+      gap: 4px;
+      background: var(--alps-bg-alt);
+      border: 1px solid var(--alps-border);
+      border-radius: 4px;
+      padding: 2px;
+    }
+    .theme-toggle button {
+      padding: 6px 10px;
+      background: transparent;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--alps-text-muted);
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .theme-toggle button.active {
+      background: var(--alps-primary);
+      color: white;
+    }
+    .theme-toggle button:hover:not(.active) {
+      color: var(--alps-text);
+    }
     select { font-family: var(--font-sans); }
     select:focus { outline: 1px solid var(--alps-primary); }
   </style>
@@ -126,6 +166,7 @@
       const [selectedId, setSelectedId] = useState(null);
       const [viewMode, setViewMode] = useState("list"); // list or calendar
       const [currentMonth, setCurrentMonth] = useState(new Date());
+      const [darkMode, setDarkMode] = useState(true);
 
       const filtered = TICKETS.filter(t => {
         if (filterCycle !== "all" && t.cycle !== filterCycle) return false;
@@ -199,7 +240,7 @@
       }
 
       return (
-        <div className="alps-app">
+        <div className={`alps-app ${darkMode ? 'dark' : 'light'}`}>
           <header className="alps-header">
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -219,7 +260,25 @@
                 </div>
               </div>
             </div>
-            <button onClick={() => { if (document.referrer) { window.close(); } else { window.location.href = "alps-prototype.html"; } }} className="button-secondary">← Back to Dashboard</button>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div className="theme-toggle">
+                <button 
+                  className={!darkMode ? 'active' : ''}
+                  onClick={() => setDarkMode(false)}
+                >
+                  <span>☀️</span>
+                  Light
+                </button>
+                <button 
+                  className={darkMode ? 'active' : ''}
+                  onClick={() => setDarkMode(true)}
+                >
+                  <span>🌙</span>
+                  Dark
+                </button>
+              </div>
+              <button onClick={() => { if (document.referrer) { window.close(); } else { window.location.href = "alps-prototype.html"; } }} className="button-secondary">← Back to Dashboard</button>
+            </div>
           </header>
 
           <main className="alps-main">

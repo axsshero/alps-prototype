@@ -21,6 +21,7 @@ function App() {
   const [fromPortfolio, setFromPortfolio]   = React.useState(false);
   const [editingSprintId, setEditingSprintId] = React.useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [darkMode, setDarkMode]             = React.useState(alpsStyles.darkMode);
 
   React.useEffect(() => {
     const handleTweak = (e) => {
@@ -36,7 +37,7 @@ function App() {
     setMobileMenuOpen(false);
   }, [screen]);
 
-  const appClass = alpsStyles.darkMode ? "alps-app dark" : "alps-app light";
+  const appClass = darkMode ? "alps-app dark" : "alps-app light";
 
   return (
     <div
@@ -82,6 +83,8 @@ function App() {
           setRole={setRole}
           mobileMenuOpen={mobileMenuOpen}
           setMobileMenuOpen={setMobileMenuOpen}
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
         />
 
         <main className="alps-main">
@@ -119,7 +122,7 @@ function App() {
 
 // ─── Sidebar navigation ───────────────────────────────────────────────────────
 
-function Sidebar_Nav({ screen, setScreen, role, setRole, mobileMenuOpen, setMobileMenuOpen }) {
+function Sidebar_Nav({ screen, setScreen, role, setRole, mobileMenuOpen, setMobileMenuOpen, darkMode, setDarkMode }) {
   const navItems = [
     { id: "overview",    label: "Overview",    icon: window.Icon.list    },
     { id: "portfolio",   label: "Portfolio",   icon: window.Icon.inbox   },
@@ -220,6 +223,71 @@ function Sidebar_Nav({ screen, setScreen, role, setRole, mobileMenuOpen, setMobi
           >
             <span style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>+</span>
             Create Ticket
+          </button>
+        </div>
+      </div>
+
+      {/* Theme switcher */}
+      <div style={{ padding: "12px 16px", borderTop: "1px solid var(--alps-border)" }}>
+        <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "8px" }}>Theme</div>
+        <div style={{ display: "flex", gap: "6px" }}>
+          <button
+            onClick={() => setDarkMode(false)}
+            style={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+              padding: "8px",
+              background: !darkMode ? "var(--alps-accent)" : "transparent",
+              border: `1px solid ${!darkMode ? "var(--alps-accent)" : "var(--alps-border)"}`,
+              borderRadius: "4px",
+              color: !darkMode ? "white" : "var(--alps-text-muted)",
+              cursor: "pointer",
+              fontSize: "11px",
+              fontWeight: 600,
+              fontFamily: "var(--font-sans)",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              if (darkMode) e.currentTarget.style.borderColor = "var(--alps-text-muted)";
+            }}
+            onMouseLeave={(e) => {
+              if (darkMode) e.currentTarget.style.borderColor = "var(--alps-border)";
+            }}
+          >
+            <span style={{ fontSize: "14px" }}>☀️</span>
+            Light
+          </button>
+          <button
+            onClick={() => setDarkMode(true)}
+            style={{
+              flex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+              padding: "8px",
+              background: darkMode ? "var(--alps-accent)" : "transparent",
+              border: `1px solid ${darkMode ? "var(--alps-accent)" : "var(--alps-border)"}`,
+              borderRadius: "4px",
+              color: darkMode ? "white" : "var(--alps-text-muted)",
+              cursor: "pointer",
+              fontSize: "11px",
+              fontWeight: 600,
+              fontFamily: "var(--font-sans)",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              if (!darkMode) e.currentTarget.style.borderColor = "var(--alps-text-muted)";
+            }}
+            onMouseLeave={(e) => {
+              if (!darkMode) e.currentTarget.style.borderColor = "var(--alps-border)";
+            }}
+          >
+            <span style={{ fontSize: "14px" }}>🌙</span>
+            Dark
           </button>
         </div>
       </div>
