@@ -159,4 +159,82 @@ const Icon = {
   link: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M7 9 9 7M5 11l-1 1a2.5 2.5 0 1 1-3.5-3.5L2 7M11 5l1-1a2.5 2.5 0 1 1 3.5 3.5L14 9"/></svg>,
 };
 
-Object.assign(window, { Avatar, Pill, StateBadge, GateTriangles, GateRow, Section, Button, Icon });
+function FormField({ label, name, type = "text", value, error, touched, onChange, onBlur, required, placeholder }) {
+  const hasError = touched && error;
+  const inputId = "field-" + name;
+  const errorId = "error-" + name;
+
+  return (
+    <div style={{ marginBottom: "16px" }}>
+      <label
+        htmlFor={inputId}
+        style={{
+          display: "block",
+          fontSize: "13px",
+          fontWeight: 600,
+          color: "var(--alps-text)",
+          marginBottom: "6px",
+        }}
+      >
+        {label}
+        {required && <span style={{ color: "var(--alps-danger)", marginLeft: "4px" }}>*</span>}
+      </label>
+
+      <input
+        id={inputId}
+        type={type}
+        name={name}
+        value={value || ""}
+        onChange={onChange}
+        onBlur={onBlur}
+        placeholder={placeholder}
+        aria-invalid={hasError ? "true" : "false"}
+        aria-describedby={hasError ? errorId : undefined}
+        style={{
+          width: "100%",
+          padding: "8px 12px",
+          fontSize: "13px",
+          fontFamily: "var(--font-sans)",
+          border: hasError ? "1px solid var(--alps-danger)" : "1px solid var(--alps-border)",
+          borderRadius: "4px",
+          background: "var(--alps-bg)",
+          color: "var(--alps-text)",
+          boxSizing: "border-box",
+          transition: "border-color 0.15s, box-shadow 0.15s",
+          outline: "none",
+        }}
+        onFocus={(e) => {
+          if (!hasError) {
+            e.target.style.borderColor = "var(--alps-primary)";
+            e.target.style.boxShadow = "0 0 0 2px var(--alps-primary-overlay)";
+          }
+        }}
+        onBlurCapture={(e) => {
+          e.target.style.borderColor = hasError ? "var(--alps-danger)" : "var(--alps-border)";
+          e.target.style.boxShadow = "none";
+        }}
+      />
+
+      {hasError && (
+        <div
+          id={errorId}
+          style={{
+            fontSize: "12px",
+            color: "var(--alps-danger)",
+            marginTop: "4px",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+          }}
+        >
+          <span style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+            {Icon.warn}
+          </span>
+          {error}
+        </div>
+      )}
+    </div>
+  );
+}
+
+Object.assign(window, { Avatar, Pill, StateBadge, GateTriangles, GateRow, Section, Button, Icon, FormField });

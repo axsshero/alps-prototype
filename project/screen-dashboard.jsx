@@ -313,6 +313,7 @@ function SuggestionCard({ sug, onApprove, onReject }) {
 function DashboardScreen({ role, suggestions, onSuggestionUpdate, activeProjectId, fromPortfolio, setScreen, setFromPortfolio }) {
   const initialProject = (activeProjectId && window.PROJECTS && window.PROJECTS.find(p => p.id === activeProjectId)) || window.PROJECT;
   const [project, setProject] = React.useState(initialProject);
+  const [showSprintForm, setShowSprintForm] = React.useState(false);
 
   React.useEffect(() => {
     const p = (activeProjectId && window.PROJECTS && window.PROJECTS.find(p => p.id === activeProjectId)) || window.PROJECT;
@@ -437,17 +438,12 @@ function DashboardScreen({ role, suggestions, onSuggestionUpdate, activeProjectI
             </div>
           </window.Section>
 
-          {/* Ticket status */}
+          {/* Ticket status - Sprint summaries */}
           <window.Section
             kicker="Progress"
-            title="Ticket Status"
+            title="Sprint Overview"
             right={
-              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                <div style={{ display: "flex", gap: "16px", fontSize: "11px" }}>
-                  <div><span style={{ color: "var(--alps-success)" }}>●</span> {doneTickets}</div>
-                  <div><span style={{ color: "var(--alps-accent)" }}>●</span> {inProgTickets}</div>
-                  <div><span style={{ color: "var(--alps-danger)" }}>●</span> {blockedTickets}</div>
-                </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <button
                   onClick={() => window.open(`Progress.html?projectId=${project.id}`, "_blank")}
                   style={{
@@ -466,27 +462,89 @@ function DashboardScreen({ role, suggestions, onSuggestionUpdate, activeProjectI
               </div>
             }
           >
-            <div>
-              <div style={{ marginBottom: "8px", fontSize: "13px" }}>
-                <strong>{doneTickets}/{totalTickets} tickets complete</strong>
-              </div>
-              <div style={{ width: "100%", height: "8px", background: "var(--alps-bg)", borderRadius: "4px", overflow: "hidden", marginBottom: "12px" }}>
-                <div style={{ height: "100%", width: `${(doneTickets / totalTickets) * 100}%`, background: "var(--alps-success)", transition: "width 0.3s ease" }} />
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
-                {[
-                  { label: "DONE",    count: doneTickets,                                              color: "var(--alps-success)"    },
-                  { label: "IN PROG", count: inProgTickets,                                            color: "var(--alps-accent)"     },
-                  { label: "BLOCKED", count: blockedTickets,                                           color: "var(--alps-danger)"     },
-                  { label: "TODO",    count: totalTickets - doneTickets - inProgTickets - blockedTickets, color: "var(--alps-text-muted)" },
-                ].map(({ label, count, color }) => (
-                  <div key={label} style={{ padding: "12px", background: "var(--alps-bg)", borderRadius: "4px", borderLeft: `3px solid ${color}` }}>
-                    <div style={{ fontSize: "11px", color: "var(--alps-text-muted)", marginBottom: "4px" }}>{label}</div>
-                    <div style={{ fontSize: "20px", fontWeight: "600", color }}>{count}</div>
+            {(() => {
+              // Get sprints for this project
+              const projectSprints = (window.SPRINTS || []).filter(s => s.projectId === project.id);
+              
+              if (projectSprints.length === 0) {
+                return (
+                  <div style={{ padding: "12px", color: "var(--alps-text-muted)", fontSize: "12px", textAlign: "center" }}>
+                    No sprints yet. Create one to get started.
                   </div>
-                ))}
-              </div>
-            </div>
+                );
+              }
+
+              return (
+                <div style={{ display: "grid", gap: "12px" }}>
+                  {projectSprints.map((sprint) => {
+                    // Get tickets for this sprint
+                    const sprintTickets = Object.values(window.LINEAR_TICKETS).filter(t => t.sprintId === sprint.id);
+                    const sprintDone = sprintTickets.filter(t => t.status === "done").length;
+                    const sprintInProg = sprintTickets.filter(t => t.status === "in_progress").length;
+                    const sprintBlocked = sprintTickets.filter(t => t.status === "blocked").length;
+                    const sprintTodo = sprintTickets.length - sprintDone - sprintInProg - sprintBlocked;
+                    const completionPct = sprintTickets.length === 0 ? 0 : Math.round((sprintDone / sprintTickets.length) * 100);
+
+                    const statusColor = {
+                      completed: "var(--alps-success)",
+                      in_progress: "var(--alps-accent)",
+                      planned: "var(--alps-text-muted)",
+                    }[sprint.status] || "var(--alps-text-muted)";
+
+                    return (
+                      <div key={sprint.id} style={{ padding: "12px", background: "var(--alps-bg)", borderRadius: "4px", borderLeft: `3px solid ${statusColor}` }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
+                          <div>
+                            <div style={{ fontSize: "12px", fontWeight: "600", color: "var(--alps-text)" }}>
+                              {sprint.name}
+                            </div>
+                            <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", marginTop: "2px" }}>
+                              {sprint.startDate} → {sprint.endDate}
+                            </div>
+                          </div>
+                          <span style={{
+                            fontSize: "10px", fontWeight: 700, padding: "2px 6px", borderRadius: "3px",
+                            background: `${statusColor}22`, color: statusColor, textTransform: "uppercase",
+                          }}>
+                            {sprint.status === "in_progress" ? "Active" : sprint.status === "completed" ? "Done" : "Planned"}
+                          </span>
+                        </div>
+
+                        {/* Progress bar */}
+                        <div style={{ marginBottom: "8px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                            <span style={{ fontSize: "10px", color: "var(--alps-text-muted)" }}>
+                              {sprintDone}/{sprintTickets.length} tickets
+                            </span>
+                            <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--alps-text)" }}>
+                              {completionPct}%
+                            </span>
+                          </div>
+                          <div style={{ height: "4px", background: "var(--alps-bg-alt)", borderRadius: "2px", overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${completionPct}%`, background: statusColor, transition: "width 0.3s" }} />
+                          </div>
+                        </div>
+
+                        {/* Status breakdown */}
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "6px" }}>
+                          {[
+                            { label: "Done", count: sprintDone, color: "var(--alps-success)" },
+                            { label: "In Prog", count: sprintInProg, color: "var(--alps-accent)" },
+                            { label: "Blocked", count: sprintBlocked, color: "var(--alps-danger)" },
+                            { label: "Todo", count: sprintTodo, color: "var(--alps-text-muted)" },
+                          ].map(({ label, count, color }) => (
+                            <div key={label} style={{ padding: "6px", background: "var(--alps-bg-alt)", borderRadius: "3px", borderLeft: `2px solid ${color}`, textAlign: "center" }}>
+                              <div style={{ fontSize: "10px", color: "var(--alps-text-muted)" }}>{label}</div>
+                              <div style={{ fontSize: "14px", fontWeight: "600", color }}>{count}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </window.Section>
 
           {/* Validation gates */}
@@ -556,6 +614,23 @@ function DashboardScreen({ role, suggestions, onSuggestionUpdate, activeProjectI
               )}
             </div>
           </window.Section>
+
+          {/* Discussion thread preview */}
+          <window.Section kicker="Collaboration" title="Discussion Thread">
+            <window.DiscussionPanel
+              entityId={project.id}
+              entityType="project"
+              teamsThreadUrl={project.teamsThreadUrl}
+              onTeamsThreadChange={(url) => {
+                setProject((prev) => ({ ...prev, teamsThreadUrl: url }));
+              }}
+              previewMode={true}
+              onViewAll={() => {
+                // Could expand to full view or navigate to a dedicated discussion screen
+                console.log("View all discussion messages for", project.id);
+              }}
+            />
+          </window.Section>
         </div>
 
         {/* ── RIGHT COLUMN — AI Suggestions (sticky) ── */}
@@ -593,7 +668,44 @@ function DashboardScreen({ role, suggestions, onSuggestionUpdate, activeProjectI
         </div>
 
       </div>
-    </div>
+
+    {/* Sprint creation modal/form */}
+    {showSprintForm && (
+      <div style={{
+        position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+        background: "rgba(0, 0, 0, 0.5)", display: "flex", alignItems: "center", justifyContent: "center",
+        zIndex: 1000, padding: "20px",
+      }}>
+        <div style={{
+          background: "var(--alps-bg)", borderRadius: "8px", maxWidth: "600px", width: "100%",
+          maxHeight: "90vh", overflow: "auto", padding: "24px", position: "relative",
+        }}>
+          {/* Close button */}
+          <button
+            onClick={() => setShowSprintForm(false)}
+            style={{
+              position: "absolute", top: "16px", right: "16px",
+              background: "transparent", border: "none", color: "var(--alps-text-muted)",
+              cursor: "pointer", fontSize: "20px", padding: "4px 8px",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            ✕
+          </button>
+
+          {/* Sprint form */}
+          <window.NewSprintForm
+            projectId={project.id}
+            onSuccess={(sprintId) => {
+              setShowSprintForm(false);
+              // Navigate to Cycles screen
+              if (setScreen) setScreen("cycles");
+            }}
+          />
+        </div>
+      </div>
+    )}
+  </div>
   );
 }
 

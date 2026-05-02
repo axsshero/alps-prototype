@@ -15,10 +15,11 @@ const alpsStyles = /*EDITMODE-BEGIN*/{
 
 function App() {
   const [role, setRole]                     = React.useState("pm");
-  const [screen, setScreen]                 = React.useState("dashboard");
+  const [screen, setScreen]                 = React.useState("overview");
   const [suggestions, setSuggestions]       = React.useState(window.INITIAL_SUGGESTIONS || {});
   const [activeProjectId, setActiveProjectId] = React.useState(null);
   const [fromPortfolio, setFromPortfolio]   = React.useState(false);
+  const [editingSprintId, setEditingSprintId] = React.useState(null);
 
   React.useEffect(() => {
     const handleTweak = (e) => {
@@ -46,6 +47,7 @@ function App() {
       <Sidebar_Nav screen={screen} setScreen={setScreen} role={role} setRole={setRole} />
 
       <main className="alps-main">
+        {screen === "overview" && <window.OverviewScreen role={role} setScreen={setScreen} setActiveProjectId={setActiveProjectId} />}
         {screen === "dashboard" && (
           <DashboardScreen
             role={role}
@@ -66,7 +68,10 @@ function App() {
           />
         )}
         {screen === "cycles"      && <CyclesScreen role={role} setScreen={setScreen} setActiveProjectId={setActiveProjectId} setFromPortfolio={setFromPortfolio} />}
-        {screen === "new-request" && <NewRequestScreen />}
+        {screen === "new-request" && <window.NewRequestScreen setScreen={setScreen} setActiveProjectId={setActiveProjectId} />}
+        {screen === "create-sprint" && <window.NewSprintForm projectId={activeProjectId || window.PROJECT.id} onSuccess={() => setScreen("overview")} />}
+        {screen === "create-ticket" && <window.NewRequestScreen setScreen={setScreen} setActiveProjectId={setActiveProjectId} />}
+        {screen === "sprint-detail" && (window.__editingSprintId || editingSprintId) && <window.SprintDetailScreen sprintId={window.__editingSprintId || editingSprintId} projectId={activeProjectId} setScreen={setScreen} />}
         {screen === "archive"     && <ArchiveScreen role={role} />}
       </main>
     </div>
@@ -77,7 +82,7 @@ function App() {
 
 function Sidebar_Nav({ screen, setScreen, role, setRole }) {
   const navItems = [
-    { id: "dashboard",   label: "Dashboard",   icon: window.Icon.list    },
+    { id: "overview",    label: "Overview",    icon: window.Icon.list    },
     { id: "portfolio",   label: "Portfolio",   icon: window.Icon.inbox   },
     { id: "cycles",      label: "Cycles",      icon: window.Icon.audit   },
     { id: "new-request", label: "New Request", icon: window.Icon.plus    },
@@ -93,32 +98,86 @@ function Sidebar_Nav({ screen, setScreen, role, setRole }) {
       </div>
 
       {/* Nav items */}
-      <div style={{ flex: 1, padding: "8px" }}>
-        {navItems.map((item) => {
-          const isActive = screen === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setScreen(item.id)}
-              style={{
-                width: "100%", display: "flex", alignItems: "center", gap: "10px",
-                padding: "8px 10px", marginBottom: "2px",
-                background: isActive ? "rgba(8, 145, 178, 0.12)" : "transparent",
-                border: "none",
-                borderLeft: isActive ? "3px solid var(--alps-accent)" : "3px solid transparent",
-                borderRadius: "0 4px 4px 0",
-                color: isActive ? "var(--alps-accent)" : "var(--alps-text-muted)",
-                cursor: "pointer", fontSize: "13px",
-                fontWeight: isActive ? 600 : 400,
-                fontFamily: "var(--font-sans)", textAlign: "left",
-                transition: "all 0.15s",
-              }}
-            >
-              <span style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>{item.icon}</span>
-              {item.label}
-            </button>
-          );
-        })}
+      <div style={{ flex: 1, padding: "8px", display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: 1 }}>
+          {navItems.map((item) => {
+            const isActive = screen === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setScreen(item.id)}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", gap: "10px",
+                  padding: "8px 10px", marginBottom: "2px",
+                  background: isActive ? "var(--alps-accent-overlay)" : "transparent",
+                  border: "none",
+                  borderLeft: isActive ? "3px solid var(--alps-accent)" : "3px solid transparent",
+                  borderRadius: "0 4px 4px 0",
+                  color: isActive ? "var(--alps-accent)" : "var(--alps-text-muted)",
+                  cursor: "pointer", fontSize: "13px",
+                  fontWeight: isActive ? 600 : 400,
+                  fontFamily: "var(--font-sans)", textAlign: "left",
+                  transition: "all 0.15s",
+                }}
+              >
+                <span style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>{item.icon}</span>
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Quick actions */}
+        <div style={{ borderTop: "1px solid var(--alps-border)", paddingTop: "8px", display: "grid", gap: "6px" }}>
+          <button
+            onClick={() => setScreen("create-sprint")}
+            style={{
+              width: "100%", display: "flex", alignItems: "center", gap: "8px",
+              padding: "8px 10px",
+              background: "transparent",
+              border: "1px solid var(--alps-accent)",
+              borderRadius: "4px",
+              color: "var(--alps-accent)",
+              cursor: "pointer", fontSize: "12px",
+              fontWeight: 600,
+              fontFamily: "var(--font-sans)", textAlign: "left",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--alps-accent-overlay)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+            }}
+          >
+            <span style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>+</span>
+            Create Sprint
+          </button>
+          <button
+            onClick={() => setScreen("create-ticket")}
+            style={{
+              width: "100%", display: "flex", alignItems: "center", gap: "8px",
+              padding: "8px 10px",
+              background: "transparent",
+              border: "1px solid var(--alps-accent)",
+              borderRadius: "4px",
+              color: "var(--alps-accent)",
+              cursor: "pointer", fontSize: "12px",
+              fontWeight: 600,
+              fontFamily: "var(--font-sans)", textAlign: "left",
+              transition: "all 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--alps-accent-overlay)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+            }}
+          >
+            <span style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>+</span>
+            Create Ticket
+          </button>
+        </div>
       </div>
 
       {/* Role switcher */}
@@ -140,10 +199,6 @@ function Sidebar_Nav({ screen, setScreen, role, setRole }) {
 }
 
 // ─── Stub screens (not yet implemented) ──────────────────────────────────────
-
-function NewRequestScreen() {
-  return <div style={{ padding: "24px", color: "var(--alps-text-muted)" }}>New request form coming soon...</div>;
-}
 
 function ArchiveScreen({ role }) {
   return <div style={{ padding: "24px", color: "var(--alps-text-muted)" }}>Archive view coming soon...</div>;

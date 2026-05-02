@@ -23,6 +23,18 @@
       --alps-cleared: #10b981;
       --alps-active: #0891b2;
       --alps-locked-stroke: #4b5563;
+      --alps-primary-overlay: rgba(37, 99, 235, 0.1);
+      --alps-primary-overlay-light: rgba(37, 99, 235, 0.08);
+      --alps-accent-overlay: rgba(8, 145, 178, 0.12);
+      --alps-accent-overlay-light: rgba(8, 145, 178, 0.08);
+      --alps-accent-overlay-lighter: rgba(8, 145, 178, 0.05);
+      --alps-danger-overlay: rgba(239, 68, 68, 0.1);
+      --alps-danger-overlay-light: rgba(239, 68, 68, 0.08);
+      --alps-danger-overlay-border: rgba(239, 68, 68, 0.2);
+      --alps-success-overlay: rgba(16, 185, 129, 0.1);
+      --alps-success-overlay-light: rgba(16, 185, 129, 0.08);
+      --alps-info-overlay: rgba(6, 182, 212, 0.1);
+      --alps-info-overlay-light: rgba(6, 182, 212, 0.08);
     }
 
     * { box-sizing: border-box; }
@@ -219,11 +231,17 @@
   <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
-  <!-- Load order: data → utils → primitives → attachments → screens → app shell -->
+  <!-- Load order: data → utils → primitives → attachments → discussion-panel → screens (new-sprint before dashboard) → app shell -->
   <script type="text/babel" src="data.jsx"></script>
   <script type="text/babel" src="utils.jsx"></script>
   <script type="text/babel" src="primitives.jsx"></script>
   <script type="text/babel" src="attachments.jsx"></script>
+  <script type="text/babel" src="discussion-panel.jsx"></script>
+  <script type="text/babel" src="screen-new-sprint.jsx"></script>
+  <script type="text/babel" src="screen-new-request.jsx"></script>
+  <script type="text/babel" src="screen-sprint-detail.jsx"></script>
+  <script type="text/babel" src="screen-calendar.jsx"></script>
+  <script type="text/babel" src="screen-overview.jsx"></script>
   <script type="text/babel" src="screen-dashboard.jsx"></script>
   <script type="text/babel" src="screen-portfolio.jsx"></script>
   <script type="text/babel" src="screen-cycles.jsx"></script>

@@ -184,7 +184,7 @@ function Attachment_Item({ attachment, compact = false }) {
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = "var(--alps-accent)";
-        e.currentTarget.style.background = "rgba(8, 145, 178, 0.08)";
+        e.currentTarget.style.background = "var(--alps-accent-overlay-light)";
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = "var(--alps-border)";
@@ -291,7 +291,7 @@ function Attachment_Upload_Placeholder({ entityType, entityId }) {
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = "var(--alps-accent)";
         e.currentTarget.style.color = "var(--alps-accent)";
-        e.currentTarget.style.background = "rgba(8, 145, 178, 0.05)";
+        e.currentTarget.style.background = "var(--alps-accent-overlay-lighter)";
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = "var(--alps-border)";

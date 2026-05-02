@@ -60,7 +60,7 @@ This is a **simplified prototype implementation** focusing on data layer and UI/
     - _Requirements: 14.1_
 
 - [ ] 3. Integrate attachments into Dashboard screen
-  - [ ] 3.1 Add project attachments section
+  - [x] 3.1 Add project attachments section
     - Place after project header, before ticket status section
     - Use `window.Section` wrapper with "Documentation" kicker
     - Display `Attachment_List` with project attachments
@@ -100,7 +100,7 @@ This is a **simplified prototype implementation** focusing on data layer and UI/
     - Add `Attachment_Upload_Placeholder` for tickets (only for developers)
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 8.2, 8.3, 8.4, 8.5_
 
-- [ ] 6. Final checkpoint - Visual verification
+- [-] 6. Final checkpoint - Visual verification
   - Open ALPS Prototype.html and verify all attachment sections render correctly
   - Check Dashboard: project attachments and gate attachments visible
   - Check Cycles: sprint descriptions and sprint attachments visible

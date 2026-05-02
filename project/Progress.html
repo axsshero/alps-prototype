@@ -47,6 +47,7 @@
   <script type="text/babel" src="data.jsx"></script>
   <script type="text/babel" src="primitives.jsx"></script>
   <script type="text/babel" src="attachments.jsx"></script>
+  <script type="text/babel" src="discussion-panel.jsx"></script>
 
   <script type="text/babel">
     const { useState, useEffect } = React;
@@ -54,6 +55,7 @@
     // --- Project Selection Logic ---
     const urlParams = new URLSearchParams(window.location.search);
     const projectIdFromUrl = urlParams.get('projectId');
+    const sprintIdFromUrl = urlParams.get('sprintId');
     const projectIdFromStorage = localStorage.getItem('alpsActiveProjectId');
     const projectId = projectIdFromUrl || projectIdFromStorage || "ALPS-218";
     const PROJECT = window.PROJECTS.find(p => p.id === projectId) || window.PROJECT;
@@ -71,10 +73,13 @@
       endDate: sprint.endDate
     }));
 
-    // Filter LINEAR_TICKETS by projectId and map to TICKETS format
+    // Filter LINEAR_TICKETS by projectId and optionally by sprintId
     const allTickets = Object.values(window.LINEAR_TICKETS);
     const projectTickets = allTickets.filter(t => t.projectId === projectId);
-    const TICKETS = projectTickets.map(t => ({
+    const filteredBySprintTickets = sprintIdFromUrl 
+      ? projectTickets.filter(t => t.sprintId === sprintIdFromUrl)
+      : projectTickets;
+    const TICKETS = filteredBySprintTickets.map(t => ({
       id: t.id,
       title: t.title,
       status: t.status,
@@ -119,6 +124,8 @@
       const [filterAssignee, setFilterAssignee] = useState("all");
       const [search, setSearch] = useState("");
       const [selectedId, setSelectedId] = useState(null);
+      const [viewMode, setViewMode] = useState("list"); // list or calendar
+      const [currentMonth, setCurrentMonth] = useState(new Date());
 
       const filtered = TICKETS.filter(t => {
         if (filterCycle !== "all" && t.cycle !== filterCycle) return false;
@@ -143,6 +150,54 @@
 
       const filtersActive = filterCycle !== "all" || filterStatus !== "all" || filterPriority !== "all" || filterAssignee !== "all" || search !== "";
 
+      // Calendar helpers
+      const getDaysInMonth = (date) => {
+        return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+      };
+
+      const getFirstDayOfMonth = (date) => {
+        return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+      };
+
+      const formatDate = (date) => {
+        return date.toISOString().split('T')[0];
+      };
+
+      const getTicketsForDate = (dateStr) => {
+        return filtered.filter(t => {
+          if (!t.dueDate) return false;
+          return formatDate(new Date(t.dueDate)) === dateStr;
+        });
+      };
+
+      const handlePrevMonth = () => {
+        setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
+      };
+
+      const handleNextMonth = () => {
+        setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
+      };
+
+      const handleToday = () => {
+        setCurrentMonth(new Date());
+      };
+
+      const monthName = currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+      // Generate calendar days
+      const daysInMonth = getDaysInMonth(currentMonth);
+      const firstDay = getFirstDayOfMonth(currentMonth);
+      const calendarDays = [];
+
+      for (let i = 0; i < firstDay; i++) {
+        calendarDays.push(null);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+        calendarDays.push(date);
+      }
+
       return (
         <div className="alps-app">
           <header className="alps-header">
@@ -154,7 +209,14 @@
               <div style={{ width: "1px", height: "20px", background: "var(--alps-border)" }}></div>
               <div>
                 <div style={{ fontSize: "12px", color: "var(--alps-text-muted)", marginBottom: "2px" }}>{PROJECT.id} · {PROJECT.title}</div>
-                <div style={{ fontSize: "15px", fontWeight: 600 }}>Progress &amp; Cycles</div>
+                <div style={{ fontSize: "15px", fontWeight: 600 }}>
+                  Progress &amp; Cycles
+                  {sprintIdFromUrl && (
+                    <span style={{ fontSize: "12px", color: "var(--alps-text-muted)", marginLeft: "8px" }}>
+                      · {window.SPRINTS.find(s => s.id === sprintIdFromUrl)?.name || "Sprint"}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
             <button onClick={() => { if (document.referrer) { window.close(); } else { window.location.href = "ALPS Prototype.html"; } }} className="button-secondary">← Back to Dashboard</button>
@@ -164,11 +226,37 @@
             <div style={{ display: "grid", gap: "20px", maxWidth: "1400px", margin: "0 auto" }}>
               {/* Quick Insights */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
-                <InsightCard label="Total Tickets" value={TICKETS.length} sub={`${doneCount} done · ${Math.round(doneCount / TICKETS.length * 100)}% complete`} />
+                <InsightCard label="Total Tickets" value={TICKETS.length} sub={`${doneCount} done · ${Math.round(TICKETS.length > 0 ? (doneCount / TICKETS.length * 100) : 0)}% complete`} />
                 <InsightCard label="In Progress" value={inProgCount} sub="active work" valueColor="var(--alps-primary)" />
-                <InsightCard label="Overdue" value={overdueCount} sub={`${Math.round(overdueCount / TICKETS.length * 100)}% of tickets`} valueColor={overdueCount > 0 ? "#dc2626" : undefined} alert={overdueCount > 0} />
+                <InsightCard label="Overdue" value={overdueCount} sub={`${Math.round(TICKETS.length > 0 ? (overdueCount / TICKETS.length * 100) : 0)}% of tickets`} valueColor={overdueCount > 0 ? "#dc2626" : undefined} alert={overdueCount > 0} />
                 <InsightCard label="Bottleneck" value={blockedByGate?.count || 0} sub={`blocked at ${blockedByGate?.gate || "—"} gate`} valueColor={blockedCount > 0 ? "var(--alps-danger)" : undefined} alert={blockedCount > 0} />
               </div>
+
+              {/* Sprint Resource Metrics - Only show when viewing a sprint */}
+              {sprintIdFromUrl && (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", padding: "16px", background: "rgba(8, 145, 178, 0.08)", border: "1px solid rgba(8, 145, 178, 0.2)", borderRadius: "8px" }}>
+                  <div style={{ display: "grid", gap: "4px" }}>
+                    <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Velocity</div>
+                    <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--alps-accent)" }}>{doneCount}</div>
+                    <div style={{ fontSize: "10px", color: "var(--alps-text-muted)" }}>completed tickets</div>
+                  </div>
+                  <div style={{ display: "grid", gap: "4px" }}>
+                    <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Capacity</div>
+                    <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--alps-primary)" }}>{TICKETS.length}</div>
+                    <div style={{ fontSize: "10px", color: "var(--alps-text-muted)" }}>total tickets</div>
+                  </div>
+                  <div style={{ display: "grid", gap: "4px" }}>
+                    <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Burndown</div>
+                    <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--alps-success)" }}>{TICKETS.length > 0 ? Math.round((doneCount / TICKETS.length) * 100) : 0}%</div>
+                    <div style={{ fontSize: "10px", color: "var(--alps-text-muted)" }}>progress</div>
+                  </div>
+                  <div style={{ display: "grid", gap: "4px" }}>
+                    <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Remaining</div>
+                    <div style={{ fontSize: "18px", fontWeight: 700, color: inProgCount > 0 ? "var(--alps-warning)" : "var(--alps-text-muted)" }}>{TICKETS.length - doneCount}</div>
+                    <div style={{ fontSize: "10px", color: "var(--alps-text-muted)" }}>tickets left</div>
+                  </div>
+                </div>
+              )}
 
               {/* Section 1 — Scheduled Cycles */}
               <div style={{ display: "grid", gap: "12px" }}>
@@ -221,6 +309,41 @@
 
               {/* Filters bar */}
               <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", background: "var(--alps-bg-alt)", border: "1px solid var(--alps-border)", borderRadius: "8px", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: "6px" }}>
+                  <button
+                    onClick={() => setViewMode("list")}
+                    style={{
+                      padding: "6px 12px",
+                      background: viewMode === "list" ? "var(--alps-primary)" : "transparent",
+                      color: viewMode === "list" ? "white" : "var(--alps-text-muted)",
+                      border: "1px solid var(--alps-border)",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      fontFamily: "var(--font-sans)",
+                    }}
+                  >
+                    List
+                  </button>
+                  <button
+                    onClick={() => setViewMode("calendar")}
+                    style={{
+                      padding: "6px 12px",
+                      background: viewMode === "calendar" ? "var(--alps-primary)" : "transparent",
+                      color: viewMode === "calendar" ? "white" : "var(--alps-text-muted)",
+                      border: "1px solid var(--alps-border)",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      fontFamily: "var(--font-sans)",
+                    }}
+                  >
+                    📅 Calendar
+                  </button>
+                </div>
+                <div style={{ width: "1px", height: "20px", background: "var(--alps-border)" }}></div>
                 <input
                   type="text" placeholder="Search tickets..."
                   value={search} onChange={(e) => setSearch(e.target.value)}
@@ -248,7 +371,8 @@
                 </div>
               </div>
 
-              {/* Tickets table + Detail panel */}
+              {/* Tickets table + Detail panel OR Calendar view */}
+              {viewMode === "list" ? (
               <div style={{ display: "grid", gridTemplateColumns: selected ? "1fr 380px" : "1fr", gap: "16px", alignItems: "start" }}>
                 <div style={{ background: "var(--alps-bg-alt)", border: "1px solid var(--alps-border)", borderRadius: "8px", overflow: "hidden" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "100px 1fr 100px 90px 70px 100px 60px", gap: "12px", padding: "10px 14px", background: "var(--alps-bg)", borderBottom: "1px solid var(--alps-border)", fontSize: "10px", fontWeight: 600, color: "var(--alps-text-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
@@ -299,6 +423,150 @@
                 {/* Detail panel */}
                 {selected && <DetailPanel ticket={selected} onClose={() => setSelectedId(null)} />}
               </div>
+              ) : (
+              <div style={{ display: "grid", gridTemplateColumns: selected ? "1fr 380px" : "1fr", gap: "16px", alignItems: "start" }}>
+                <div style={{ background: "var(--alps-bg-alt)", border: "1px solid var(--alps-border)", borderRadius: "8px", padding: "16px" }}>
+                {/* Calendar Navigation */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                  <button
+                    onClick={handlePrevMonth}
+                    style={{
+                      padding: "6px 10px",
+                      background: "transparent",
+                      border: "1px solid var(--alps-border)",
+                      borderRadius: "4px",
+                      color: "var(--alps-text-muted)",
+                      cursor: "pointer",
+                      fontSize: "12px",
+                      fontFamily: "var(--font-sans)",
+                    }}
+                  >
+                    ← Prev
+                  </button>
+                  <div style={{ fontSize: "16px", fontWeight: "600", color: "var(--alps-text)", minWidth: "180px", textAlign: "center" }}>
+                    {monthName}
+                  </div>
+                  <button
+                    onClick={handleNextMonth}
+                    style={{
+                      padding: "6px 10px",
+                      background: "transparent",
+                      border: "1px solid var(--alps-border)",
+                      borderRadius: "4px",
+                      color: "var(--alps-text-muted)",
+                      cursor: "pointer",
+                      fontSize: "12px",
+                      fontFamily: "var(--font-sans)",
+                    }}
+                  >
+                    Next →
+                  </button>
+                  <button
+                    onClick={handleToday}
+                    style={{
+                      padding: "6px 10px",
+                      background: "var(--alps-primary)",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      fontFamily: "var(--font-sans)",
+                    }}
+                  >
+                    Today
+                  </button>
+                </div>
+
+                {/* Calendar Grid */}
+                <div style={{ display: "grid", gap: "12px" }}>
+                  {/* Day headers */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "4px", marginBottom: "8px" }}>
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
+                      <div key={day} style={{ textAlign: "center", fontSize: "11px", fontWeight: "600", color: "var(--alps-text-muted)", padding: "8px 0" }}>
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Calendar grid */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "4px" }}>
+                    {calendarDays.map((date, idx) => {
+                      if (!date) {
+                        return <div key={`empty-${idx}`} style={{ aspectRatio: "1", background: "var(--alps-bg)" }} />;
+                      }
+
+                      const dateStr = formatDate(date);
+                      const dayTickets = getTicketsForDate(dateStr);
+                      const isToday = formatDate(new Date()) === dateStr;
+                      const isCurrentMonth = date.getMonth() === currentMonth.getMonth();
+
+                      return (
+                        <div
+                          key={dateStr}
+                          style={{
+                            aspectRatio: "1",
+                            padding: "8px",
+                            background: isCurrentMonth ? "var(--alps-bg)" : "var(--alps-bg-alt)",
+                            border: isToday ? "2px solid var(--alps-primary)" : "1px solid var(--alps-border)",
+                            borderRadius: "4px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "4px",
+                            position: "relative",
+                            overflow: "hidden",
+                          }}
+                        >
+                          <div style={{ fontSize: "11px", fontWeight: "600", color: isToday ? "var(--alps-primary)" : "var(--alps-text)" }}>
+                            {date.getDate()}
+                          </div>
+
+                          {dayTickets.length > 0 && (
+                            <div style={{ display: "grid", gap: "2px", flex: 1, minHeight: 0, overflow: "auto" }}>
+                              {dayTickets.map(t => (
+                                <div
+                                  key={t.id}
+                                  onClick={() => setSelectedId(t.id)}
+                                  style={{
+                                    fontSize: "7px",
+                                    padding: "2px 3px",
+                                    background: statusBg(t.status),
+                                    color: statusColor(t.status),
+                                    borderRadius: "2px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                    fontWeight: "600",
+                                    cursor: "pointer",
+                                    transition: "all 0.15s",
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = statusColor(t.status);
+                                    e.currentTarget.style.color = "white";
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = statusBg(t.status);
+                                    e.currentTarget.style.color = statusColor(t.status);
+                                  }}
+                                  title={`${t.id}: ${t.title}`}
+                                >
+                                  {t.id}: {t.title}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+                </div>
+
+                {/* Detail panel */}
+                {selected && <DetailPanel ticket={selected} onClose={() => setSelectedId(null)} />}
+              </div>
+              )}
             </div>
           </main>
         </div>
@@ -637,6 +905,14 @@
               </div>
             </Field>
           )}
+
+          <Field label="Discussion">
+            <window.DiscussionPanel
+              entityId={displayTicket.id}
+              entityType="ticket"
+              previewMode={false}
+            />
+          </Field>
         </div>
       );
     }

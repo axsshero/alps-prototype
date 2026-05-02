@@ -24,6 +24,8 @@ const PROJECT = {
   targetDelivery: "2026-07-15",
   state: "in_progress",
   currentGate: 2,
+  teamsThreadUrl: "https://teams.microsoft.com/l/channel/19%3A4a5f8c2b9e1d3f6a7b8c9d0e1f2a3b4c%40thread.tacv2",
+  teamsThreadId: "19:4a5f8c2b9e1d3f6a7b8c9d0e1f2a3b4c@thread.tacv2",
   gates: {
     business: {
       status: "cleared",
@@ -90,6 +92,8 @@ const SPRINTS = [
     endDate: "2026-04-14",
     completedTickets: 4,
     totalTickets: 4,
+    teamsThreadUrl: null,
+    teamsThreadId: null,
   },
   {
     id: "sprint-2",
@@ -102,6 +106,8 @@ const SPRINTS = [
     endDate: "2026-04-28",
     completedTickets: 3,
     totalTickets: 6,
+    teamsThreadUrl: "https://teams.microsoft.com/l/channel/19%3A8f3a1b6c2d9e4f7a1c5e8b2d5f8a1c4e%40thread.tacv2",
+    teamsThreadId: "19:8f3a1b6c2d9e4f7a1c5e8b2d5f8a1c4e@thread.tacv2",
   },
   {
     id: "sprint-3",
@@ -114,6 +120,8 @@ const SPRINTS = [
     endDate: "2026-05-14",
     completedTickets: 0,
     totalTickets: 4,
+    teamsThreadUrl: null,
+    teamsThreadId: null,
   },
   {
     id: "sprint-4",
@@ -126,6 +134,8 @@ const SPRINTS = [
     endDate: "2026-05-28",
     completedTickets: 0,
     totalTickets: 3,
+    teamsThreadUrl: null,
+    teamsThreadId: null,
   },
   {
     id: "sprint-5",
@@ -138,6 +148,8 @@ const SPRINTS = [
     endDate: "2026-07-14",
     completedTickets: 1,
     totalTickets: 3,
+    teamsThreadUrl: "https://teams.microsoft.com/l/channel/19%3A5c7d2e9f4a1b6c3d8e5f2a7b4c9d1e6f%40thread.tacv2",
+    teamsThreadId: "19:5c7d2e9f4a1b6c3d8e5f2a7b4c9d1e6f@thread.tacv2",
   },
 ];
 
@@ -479,81 +491,484 @@ const GITLAB_ACTIVITY = [
   { id: "g11", type: "mr", ref: "!503 — Webhook resilience improvements", who: "jun", at: "2026-04-28 15:00", status: "draft", checks: { ci: "running", security: "pending", coverage: "—" } },
 ];
 
-// Discussion Thread — Stakeholder / Developer conversation
-const DISCUSSION_THREAD = [
-  {
-    id: "d1",
-    author: "priya",
-    role: "Stakeholder",
-    text: "Question on implementation: if a payment fails 5 times, do we auto-cancel the subscription or keep retrying indefinitely?",
-    at: "2026-04-20 09:30",
-    replies: [],
-  },
-  {
-    id: "d2",
-    author: "jun",
-    role: "Developer",
-    text: "Good point. Currently designed to retry up to 5 times over 72 hours, then flag for manual review. Auto-cancellation is risky — some failures are transient (network blip). Let's keep the manual review for now.",
-    at: "2026-04-20 10:15",
-    replies: [],
-  },
-  {
-    id: "d3",
-    author: "rina",
-    role: "Product Manager",
-    text: "Agree with Jun. But we should add a configurable threshold per product. SaaS products might want auto-cancel after 10 failures, while recurring services might want longer retry windows. @Mateo, is this feasible in the current arch?",
-    at: "2026-04-20 11:05",
-    replies: [],
-  },
-  {
-    id: "d4",
-    author: "mateo",
-    role: "Tech Lead",
-    text: "Yes, totally feasible. We can add a `retry_policy` config per product with fields: max_attempts, retry_window, on_exhaustion (manual_review | auto_cancel | notify_only). I'll add to sprint 3.",
-    at: "2026-04-20 11:45",
-    replies: [],
-  },
-  {
-    id: "d5",
-    author: "asha",
-    role: "Requestor",
-    text: "Perfect. This also unblocks the GTM team — we can tell enterprise customers we support their dunning rules without custom code. When does sprint 3 start?",
-    at: "2026-04-20 14:20",
-    replies: [],
-  },
-  {
-    id: "d6",
-    author: "mateo",
-    role: "Tech Lead",
-    text: "Sprint 3 kicks off May 1st. We'll have LIN-211, LIN-212 (edge cases) + the new retry_policy work done by mid-May. Should be solid for beta in June.",
-    at: "2026-04-20 15:00",
-    replies: [],
-  },
-  {
-    id: "d7",
-    author: "priya",
-    role: "Stakeholder",
-    text: "Great. One more thing: can we add a webhook notification when a subscription is about to expire due to repeated failures? Our ops team needs 24hr warning.",
-    at: "2026-04-21 08:45",
-    replies: [],
-  },
-  {
-    id: "d8",
-    author: "lena",
-    role: "Developer",
-    text: "Already in LIN-208 (webhook fan-out). We're sending events to both CRM and analytics. Ops can subscribe to the `subscription.at_risk` event and trigger their workflow. I'll add docs on the webhook schema.",
-    at: "2026-04-21 09:30",
-    replies: [],
-  },
-  {
-    id: "d9",
-    author: "asha",
-    role: "Requestor",
-    text: "Excellent. This is exactly what marketing needs to retain high-value customers. Team is excited about the timeline. 🚀",
-    at: "2026-04-21 10:15",
-    replies: [],
-  },
-];
+// Discussion Threads — Project and Sprint discussions with nested replies
+const DISCUSSION_THREAD = {
+  // ALPS-218: Recurring Engine — Subscription Billing
+  "project-ALPS-218": [
+    {
+      id: "d1",
+      author: "priya",
+      timestamp: "2026-04-20T09:30:00",
+      message: "Question on implementation: if a payment fails 5 times, do we auto-cancel the subscription or keep retrying indefinitely?",
+      replies: [
+        {
+          id: "d1-r1",
+          author: "jun",
+          timestamp: "2026-04-20T10:15:00",
+          message: "Good point. Currently designed to retry up to 5 times over 72 hours, then flag for manual review. Auto-cancellation is risky — some failures are transient (network blip). Let's keep the manual review for now.",
+          replies: [],
+        },
+        {
+          id: "d1-r2",
+          author: "rina",
+          timestamp: "2026-04-20T11:05:00",
+          message: "Agree with Jun. But we should add a configurable threshold per product. SaaS products might want auto-cancel after 10 failures, while recurring services might want longer retry windows. @Mateo, is this feasible in the current arch?",
+          replies: [
+            {
+              id: "d1-r2-r1",
+              author: "mateo",
+              timestamp: "2026-04-20T11:45:00",
+              message: "Yes, totally feasible. We can add a `retry_policy` config per product with fields: max_attempts, retry_window, on_exhaustion (manual_review | auto_cancel | notify_only). I'll add to sprint 3.",
+              replies: [],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "d2",
+      author: "asha",
+      timestamp: "2026-04-20T14:20:00",
+      message: "Perfect. This also unblocks the GTM team — we can tell enterprise customers we support their dunning rules without custom code. When does sprint 3 start?",
+      replies: [
+        {
+          id: "d2-r1",
+          author: "mateo",
+          timestamp: "2026-04-20T15:00:00",
+          message: "Sprint 3 kicks off May 1st. We'll have LIN-211, LIN-212 (edge cases) + the new retry_policy work done by mid-May. Should be solid for beta in June.",
+          replies: [],
+        },
+      ],
+    },
+    {
+      id: "d3",
+      author: "priya",
+      timestamp: "2026-04-21T08:45:00",
+      message: "Great. One more thing: can we add a webhook notification when a subscription is about to expire due to repeated failures? Our ops team needs 24hr warning.",
+      replies: [
+        {
+          id: "d3-r1",
+          author: "lena",
+          timestamp: "2026-04-21T09:30:00",
+          message: "Already in LIN-208 (webhook fan-out). We're sending events to both CRM and analytics. Ops can subscribe to the `subscription.at_risk` event and trigger their workflow. I'll add docs on the webhook schema.",
+          replies: [],
+        },
+        {
+          id: "d3-r2",
+          author: "asha",
+          timestamp: "2026-04-21T10:15:00",
+          message: "Excellent. This is exactly what marketing needs to retain high-value customers. Team is excited about the timeline. 🚀",
+          replies: [],
+        },
+      ],
+    },
+    {
+      id: "d4",
+      author: "jun",
+      timestamp: "2026-04-25T14:30:00",
+      message: "Exponential backoff implementation is complete. Testing with edge cases now. Max retry limit is 5, max wait of 16 seconds before giving up.",
+      replies: [
+        {
+          id: "d4-r1",
+          author: "mateo",
+          timestamp: "2026-04-25T15:00:00",
+          message: "Great progress. Make sure to handle the jitter correctly — we want to avoid thundering herd when multiple retries align.",
+          replies: [
+            {
+              id: "d4-r1-r1",
+              author: "jun",
+              timestamp: "2026-04-25T15:45:00",
+              message: "Already on it. Added ±10% jitter to each retry delay. Tests are passing.",
+              replies: [],
+            },
+          ],
+        },
+        {
+          id: "d4-r2",
+          author: "rina",
+          timestamp: "2026-04-25T16:20:00",
+          message: "Perfect. That aligns with our dunning strategy. Can we get this into sprint 2 by end of week?",
+          replies: [],
+        },
+      ],
+    },
+  ],
+
+  // ALPS-301: Express Payment in Payment Summary
+  "project-ALPS-301": [
+    {
+      id: "d5",
+      author: "lena",
+      timestamp: "2026-05-10T10:00:00",
+      message: "Started working on the React payment summary component. Basic layout is done, now working on form validation and payment method selection.",
+      replies: [
+        {
+          id: "d5-r1",
+          author: "rina",
+          timestamp: "2026-05-10T11:30:00",
+          message: "Great! Does it handle all the edge cases from the product spec? Partial refunds, currency formatting, etc?",
+          replies: [
+            {
+              id: "d5-r1-r1",
+              author: "lena",
+              timestamp: "2026-05-10T13:00:00",
+              message: "Working through those now. Currency formatting is tricky with JPY and KWD. I'll have a full implementation by EOD tomorrow.",
+              replies: [],
+            },
+          ],
+        },
+        {
+          id: "d5-r2",
+          author: "mateo",
+          timestamp: "2026-05-10T12:15:00",
+          message: "Make sure to test with the design system components. We want pixel-perfect parity with the PHP version.",
+          replies: [],
+        },
+      ],
+    },
+    {
+      id: "d6",
+      author: "jun",
+      timestamp: "2026-05-15T09:00:00",
+      message: "API endpoints are scaffolded. Waiting on Payments API v3 credentials from procurement. Should arrive by June 1st.",
+      replies: [
+        {
+          id: "d6-r1",
+          author: "rina",
+          timestamp: "2026-05-15T10:30:00",
+          message: "Can we start with a mock to unblock the integration tests?",
+          replies: [
+            {
+              id: "d6-r1-r1",
+              author: "jun",
+              timestamp: "2026-05-15T11:00:00",
+              message: "Good idea. I'll stub out the mock endpoints so we can test the flow end-to-end.",
+              replies: [],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "d7",
+      author: "priya",
+      timestamp: "2026-05-20T14:00:00",
+      message: "Stakeholder feedback: can we add Apple Pay and Google Pay support? Our mobile users are asking for it.",
+      replies: [
+        {
+          id: "d7-r1",
+          author: "rina",
+          timestamp: "2026-05-20T15:30:00",
+          message: "Already in scope for this sprint. Lena is working on the express pay buttons. Should be ready for testing by end of week.",
+          replies: [],
+        },
+      ],
+    },
+  ],
+
+  // ALPS-302: Favourite Page Optimisation
+  "project-ALPS-302": [
+    {
+      id: "d8",
+      author: "sven",
+      timestamp: "2026-05-16T09:00:00",
+      message: "Mobile users represent 58% of traffic but only 31% of saves. Flutter migration should help us close that gap. What's the timeline looking like?",
+      replies: [
+        {
+          id: "d8-r1",
+          author: "rina",
+          timestamp: "2026-05-16T10:30:00",
+          message: "Business gate is in progress. We're targeting Q3 for the full implementation. Jun is leading the tech architecture.",
+          replies: [
+            {
+              id: "d8-r1-r1",
+              author: "jun",
+              timestamp: "2026-05-16T11:00:00",
+              message: "Yes, we're planning to use Flutter 3.x with Riverpod for state management and Hive for local storage. Offline sync is a key feature.",
+              replies: [],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "d9",
+      author: "rina",
+      timestamp: "2026-05-22T13:00:00",
+      message: "Added mobile engagement baseline metrics from analytics. We have solid data to support the business case.",
+      replies: [
+        {
+          id: "d9-r1",
+          author: "sven",
+          timestamp: "2026-05-22T14:15:00",
+          message: "Excellent. This gives us confidence to move forward. When can we start the product gate?",
+          replies: [
+            {
+              id: "d9-r1-r1",
+              author: "rina",
+              timestamp: "2026-05-22T15:00:00",
+              message: "Once business gate is cleared, we'll kick off product gate immediately. Targeting early June.",
+              replies: [],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+
+  // Sprint 2: Core Logic
+  "sprint-sprint-2": [
+    {
+      id: "d10",
+      author: "jun",
+      timestamp: "2026-04-15T09:00:00",
+      message: "Sprint 2 kickoff. Focus is on retry logic with exponential backoff and billing dashboard UI. Let's aim for a solid foundation.",
+      replies: [
+        {
+          id: "d10-r1",
+          author: "lena",
+          timestamp: "2026-04-15T10:30:00",
+          message: "Dashboard UI is ready to start. I'll have the invoice list table component done by mid-sprint.",
+          replies: [],
+        },
+        {
+          id: "d10-r2",
+          author: "mateo",
+          timestamp: "2026-04-15T11:00:00",
+          message: "Great. Let's sync on the API contract so frontend and backend can work in parallel.",
+          replies: [],
+        },
+      ],
+    },
+    {
+      id: "d11",
+      author: "lena",
+      timestamp: "2026-04-20T16:00:00",
+      message: "Dashboard table is looking good. Added sorting, filtering, and pagination. Need to add export to CSV next.",
+      replies: [
+        {
+          id: "d11-r1",
+          author: "rina",
+          timestamp: "2026-04-20T17:00:00",
+          message: "Excellent progress. Can you also add loading and error states?",
+          replies: [
+            {
+              id: "d11-r1-r1",
+              author: "lena",
+              timestamp: "2026-04-21T09:00:00",
+              message: "Already on the list. Will have those done by EOD today.",
+              replies: [],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "d12",
+      author: "jun",
+      timestamp: "2026-04-22T14:30:00",
+      message: "Retry logic is 75% complete. Testing with various failure scenarios. Should be ready for review by end of week.",
+      replies: [
+        {
+          id: "d12-r1",
+          author: "mateo",
+          timestamp: "2026-04-22T15:00:00",
+          message: "Make sure to test the circuit breaker pattern. We don't want cascading failures.",
+          replies: [],
+        },
+      ],
+    },
+  ],
+
+  // Sprint 3: Retry & Edge Cases
+  "sprint-sprint-3": [
+    {
+      id: "d13",
+      author: "jun",
+      timestamp: "2026-05-01T09:00:00",
+      message: "Sprint 3 kickoff. Focus on edge cases: partial refunds, subscription cancellations, cascading failure prevention.",
+      replies: [
+        {
+          id: "d13-r1",
+          author: "mateo",
+          timestamp: "2026-05-01T10:00:00",
+          message: "Good. Let's also include load testing to validate system resilience under high concurrency.",
+          replies: [
+            {
+              id: "d13-r1-r1",
+              author: "jun",
+              timestamp: "2026-05-01T11:00:00",
+              message: "Already planned. We'll test with 10k concurrent retries and 100 req/sec sustained.",
+              replies: [],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "d14",
+      author: "lena",
+      timestamp: "2026-05-05T13:00:00",
+      message: "Partial refund handling is tricky. Need to reconcile invoice vs actual transaction amounts. Any thoughts on the best approach?",
+      replies: [
+        {
+          id: "d14-r1",
+          author: "jun",
+          timestamp: "2026-05-05T14:00:00",
+          message: "We should detect the refund webhook, pause the retry state machine, and emit an event for ops team.",
+          replies: [
+            {
+              id: "d14-r1-r1",
+              author: "lena",
+              timestamp: "2026-05-05T15:00:00",
+              message: "That makes sense. I'll implement the webhook detection and state machine pause logic.",
+              replies: [],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+
+  // Sprint 5: Express Payment Migration
+  "sprint-sprint-5": [
+    {
+      id: "d15",
+      author: "lena",
+      timestamp: "2026-07-01T09:00:00",
+      message: "Sprint 5 kickoff. React payment summary migration is the main focus. Let's aim for production-ready by end of sprint.",
+      replies: [
+        {
+          id: "d15-r1",
+          author: "jun",
+          timestamp: "2026-07-01T10:30:00",
+          message: "API endpoints are ready. We can start integration testing immediately.",
+          replies: [],
+        },
+        {
+          id: "d15-r2",
+          author: "rina",
+          timestamp: "2026-07-01T11:00:00",
+          message: "Great. Let's make sure we have feature flags in place for gradual rollout.",
+          replies: [],
+        },
+      ],
+    },
+    {
+      id: "d16",
+      author: "lena",
+      timestamp: "2026-07-05T15:00:00",
+      message: "React components are done. Visual parity with PHP version is pixel-perfect. Ready for accessibility audit.",
+      replies: [
+        {
+          id: "d16-r1",
+          author: "mateo",
+          timestamp: "2026-07-05T16:00:00",
+          message: "Excellent. Let's schedule the accessibility audit for tomorrow.",
+          replies: [],
+        },
+      ],
+    },
+  ],
+
+  // Ticket discussions
+  "ticket-LIN-206": [
+    {
+      id: "t206-1",
+      author: "lena",
+      timestamp: "2026-04-30T14:00:00",
+      message: "Started working on the dashboard today. Basic table layout is done.",
+      replies: [],
+    },
+    {
+      id: "t206-2",
+      author: "rina",
+      timestamp: "2026-04-30T14:30:00",
+      message: "Great! Does it handle pagination for large invoice lists?",
+      replies: [
+        {
+          id: "t206-2-r1",
+          author: "lena",
+          timestamp: "2026-04-30T15:00:00",
+          message: "Not yet — working on that next. Thinking 50 invoices per page.",
+          replies: [],
+        },
+      ],
+    },
+    {
+      id: "t206-3",
+      author: "mateo",
+      timestamp: "2026-04-30T15:15:00",
+      message: "Make sure to handle loading states and error cases too.",
+      replies: [
+        {
+          id: "t206-3-r1",
+          author: "lena",
+          timestamp: "2026-04-30T15:40:00",
+          message: "Will add those. Also added export to CSV feature as a bonus.",
+          replies: [],
+        },
+      ],
+    },
+  ],
+
+  "ticket-LIN-205": [
+    {
+      id: "t205-1",
+      author: "jun",
+      timestamp: "2026-04-30T13:00:00",
+      message: "Exponential backoff is live. Testing with edge cases now.",
+      replies: [],
+    },
+    {
+      id: "t205-2",
+      author: "mateo",
+      timestamp: "2026-04-30T13:10:00",
+      message: "What's the max retry limit?",
+      replies: [
+        {
+          id: "t205-2-r1",
+          author: "jun",
+          timestamp: "2026-04-30T13:20:00",
+          message: "5 retries total, max wait of 16 seconds before giving up.",
+          replies: [],
+        },
+        {
+          id: "t205-2-r2",
+          author: "rina",
+          timestamp: "2026-04-30T13:30:00",
+          message: "Perfect. That aligns with our dunning strategy.",
+          replies: [],
+        },
+      ],
+    },
+  ],
+
+  "ticket-LIN-208": [
+    {
+      id: "t208-1",
+      author: "jun",
+      timestamp: "2026-04-30T08:00:00",
+      message: "Blocked on Payments API v3 release. Expected next week.",
+      replies: [],
+    },
+    {
+      id: "t208-2",
+      author: "rina",
+      timestamp: "2026-04-30T09:00:00",
+      message: "Can we start with a mock to unblock the webhook logic?",
+      replies: [
+        {
+          id: "t208-2-r1",
+          author: "jun",
+          timestamp: "2026-04-30T10:00:00",
+          message: "Good idea. I'll stub it out so we can test the flow.",
+          replies: [],
+        },
+      ],
+    },
+  ],
+};
 
 // Cycles / Releases
 const CYCLES = [
@@ -587,6 +1002,8 @@ const ALPS_301 = {
   targetDelivery: "2026-08-30",
   state: "in_progress",
   currentGate: 2,
+  teamsThreadUrl: "https://teams.microsoft.com/l/channel/19%3A7d2e9f4c1a5b8e3d6f9c2a5e8b1d4f7a%40thread.tacv2",
+  teamsThreadId: "19:7d2e9f4c1a5b8e3d6f9c2a5e8b1d4f7a@thread.tacv2",
   gates: {
     business: {
       status: "cleared",
@@ -651,6 +1068,8 @@ const ALPS_302 = {
   targetDelivery: "2026-09-30",
   state: "empty",
   currentGate: 1,
+  teamsThreadUrl: null,
+  teamsThreadId: null,
   gates: {
     business: {
       status: "in_progress",
