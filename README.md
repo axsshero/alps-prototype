@@ -1,6 +1,32 @@
-# CODING AGENTS: READ THIS FIRST
+# ALPS Project
+
+**ALPS (Agile Lifecycle & Project Steering)** — A React-based project visibility and management prototype.
 
 This is a **handoff bundle** from Claude Design (claude.ai/design).
+
+## 🚀 Quick Start
+
+### View Online (GitHub Pages)
+Once deployed, visit: `https://<your-username>.github.io/<repo-name>/`
+
+See [GITHUB_PAGES_SETUP.md](GITHUB_PAGES_SETUP.md) for deployment instructions.
+
+### Run Locally with Docker
+```bash
+docker-compose up
+# Visit http://localhost:8080
+```
+
+### Run Locally with Python
+```bash
+cd project
+python3 -m http.server 8000
+# Visit http://localhost:8000
+```
+
+---
+
+## About This Project
 
 A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
 
