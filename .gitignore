@@ -1,0 +1,9 @@
+# Kiro workspace folder (keep local only)
+.kiro/
+
+# Node modules
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
