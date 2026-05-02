@@ -45,7 +45,7 @@
       color: var(--alps-text);
       min-height: 100vh;
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
     }
 
     .alps-sidebar {
@@ -222,6 +222,249 @@
       font-family: var(--font-sans);
     }
     select:focus { outline: none; border-color: var(--alps-accent) !important; }
+
+    /* ─── Mobile Responsive Styles ─────────────────────────────────────────── */
+    
+    /* Mobile overlay - hidden by default */
+    .mobile-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    .mobile-overlay.active {
+      display: block;
+    }
+
+    /* Mobile header - hidden by default */
+    .mobile-header {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--alps-bg-alt);
+      border-bottom: 1px solid var(--alps-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .mobile-menu-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: transparent;
+      border: 1px solid var(--alps-border);
+      border-radius: 4px;
+      color: var(--alps-text);
+      cursor: pointer;
+      font-size: 18px;
+      font-family: var(--font-sans);
+    }
+
+    @media (max-width: 768px) {
+      /* Show mobile header */
+      .mobile-header {
+        display: flex !important;
+      }
+
+      /* Hide sidebar by default on mobile */
+      .alps-sidebar {
+        position: fixed;
+        left: -220px;
+        top: 0;
+        height: 100vh;
+        width: 220px;
+        z-index: 1000;
+        transition: left 0.3s ease;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .alps-sidebar.mobile-open {
+        left: 0;
+      }
+
+      /* Adjust main content */
+      .alps-main {
+        padding: 16px;
+        min-height: calc(100vh - 60px);
+        width: 100%;
+      }
+
+      /* Two-column layouts become single column */
+      .alps-main > div > div[style*="gridTemplateColumns"] {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Summary bar wraps better */
+      .alps-section {
+        padding: 14px;
+      }
+
+      /* Smaller text on mobile */
+      h1 {
+        font-size: 20px !important;
+      }
+
+      /* Filter buttons wrap */
+      div[style*="display: flex"][style*="gap"] {
+        flex-wrap: wrap;
+      }
+
+      /* Sprint cards and project cards adjust */
+      .gate-card {
+        margin-bottom: 10px;
+      }
+
+      /* Workload summary in cycles */
+      div[style*="gridTemplateColumns: 1fr 280px"] {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Calendar grid adjusts */
+      div[style*="gridTemplateColumns: repeat(7, 1fr)"] {
+        gap: 2px !important;
+      }
+
+      /* Stat boxes stack better */
+      div[style*="display: flex"][style*="gap: 12px"] > div[style*="minWidth: 72px"] {
+        min-width: 60px !important;
+        padding: 6px 10px !important;
+      }
+
+      /* Button text sizing */
+      .alps-btn {
+        font-size: 11px;
+        padding: 6px 10px;
+      }
+
+      /* Input fields full width */
+      input[type="text"],
+      select,
+      textarea {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+
+      /* Avatar sizing */
+      .alps-avatar {
+        width: 20px !important;
+        height: 20px !important;
+        font-size: 10px !important;
+      }
+
+      /* Pill sizing */
+      .alps-pill {
+        font-size: 10px;
+        padding: 2px 6px;
+      }
+
+      /* Section headers */
+      .alps-section__head {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 8px !important;
+      }
+
+      .alps-section__right {
+        width: 100%;
+      }
+
+      /* Gate row stacks on mobile */
+      .alps-gaterow {
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      /* Timeline adjustments */
+      div[style*="position: relative"][style*="height: 40px"] {
+        height: 32px !important;
+      }
+
+      /* Workload cards */
+      div[style*="display: grid"][style*="gap: 8px"] > div[style*="display: flex"] {
+        flex-wrap: wrap;
+      }
+
+      /* Sprint detail expanded sections */
+      div[style*="gridTemplateColumns: repeat(3, 1fr)"] {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+      }
+
+      div[style*="gridTemplateColumns: repeat(4, 1fr)"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 6px !important;
+      }
+
+      /* Summary bar stats */
+      div[style*="display: flex"][style*="flexWrap: wrap"] {
+        justify-content: center;
+      }
+
+      /* Project card adjustments */
+      div[style*="display: flex"][style*="justifyContent: space-between"] {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      /* Hide some secondary info on very small screens */
+      @media (max-width: 480px) {
+        .alps-kicker {
+          font-size: 9px;
+        }
+
+        .alps-section__title {
+          font-size: 13px;
+        }
+
+        /* Compact stat displays */
+        div[style*="fontSize: 22px"] {
+          font-size: 18px !important;
+        }
+
+        div[style*="fontSize: 18px"] {
+          font-size: 16px !important;
+        }
+
+        /* Tighter spacing */
+        .alps-main {
+          padding: 12px;
+        }
+
+        .alps-section {
+          padding: 12px;
+          gap: 10px;
+        }
+      }
+    }
+
+    /* Tablet adjustments (768px - 1024px) */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .alps-sidebar {
+        width: 180px;
+      }
+
+      .alps-main {
+        padding: 20px;
+      }
+
+      /* Two-column layouts get narrower sidebar column */
+      div[style*="gridTemplateColumns: 1fr 380px"] {
+        grid-template-columns: 1fr 300px !important;
+      }
+
+      div[style*="gridTemplateColumns: 1fr 280px"] {
+        grid-template-columns: 1fr 240px !important;
+      }
+    }
   </style>
 </head>
 <body>

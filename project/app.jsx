@@ -20,6 +20,7 @@ function App() {
   const [activeProjectId, setActiveProjectId] = React.useState(null);
   const [fromPortfolio, setFromPortfolio]   = React.useState(false);
   const [editingSprintId, setEditingSprintId] = React.useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   React.useEffect(() => {
     const handleTweak = (e) => {
@@ -29,6 +30,11 @@ function App() {
     window.addEventListener("message", handleTweak);
     return () => window.removeEventListener("message", handleTweak);
   }, []);
+
+  // Close mobile menu when screen changes
+  React.useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [screen]);
 
   const appClass = alpsStyles.darkMode ? "alps-app dark" : "alps-app light";
 
@@ -44,43 +50,76 @@ function App() {
         "--alps-info":    alpsStyles.infoColor,
       }}
     >
-      <Sidebar_Nav screen={screen} setScreen={setScreen} role={role} setRole={setRole} />
+      {/* Mobile header - shown only on mobile */}
+      <div className="mobile-header">
+        <button 
+          className="mobile-menu-btn"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          ☰
+        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{ width: "24px", height: "24px", borderRadius: "4px", background: "var(--alps-primary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 800, color: "white" }}>A</div>
+          <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--alps-text)", letterSpacing: "-0.01em" }}>ALPS</span>
+        </div>
+        <div style={{ width: "36px" }} />
+      </div>
 
-      <main className="alps-main">
-        {screen === "overview" && <window.OverviewScreen role={role} setScreen={setScreen} setActiveProjectId={setActiveProjectId} />}
-        {screen === "dashboard" && (
-          <DashboardScreen
-            role={role}
-            suggestions={suggestions}
-            onSuggestionUpdate={setSuggestions}
-            activeProjectId={activeProjectId}
-            fromPortfolio={fromPortfolio}
-            setScreen={setScreen}
-            setFromPortfolio={setFromPortfolio}
-          />
-        )}
-        {screen === "portfolio" && (
-          <PortfolioScreen
-            role={role}
-            setScreen={setScreen}
-            setActiveProjectId={setActiveProjectId}
-            setFromPortfolio={setFromPortfolio}
-          />
-        )}
-        {screen === "cycles"      && <CyclesScreen role={role} setScreen={setScreen} setActiveProjectId={setActiveProjectId} setFromPortfolio={setFromPortfolio} />}
-        {screen === "new-request" && <window.NewRequestScreen setScreen={setScreen} setActiveProjectId={setActiveProjectId} />}
-        {screen === "create-sprint" && <window.NewSprintForm projectId={activeProjectId || window.PROJECT.id} onSuccess={() => setScreen("overview")} />}
-        {screen === "create-ticket" && <window.NewRequestScreen setScreen={setScreen} setActiveProjectId={setActiveProjectId} />}
-        {screen === "sprint-detail" && (window.__editingSprintId || editingSprintId) && <window.SprintDetailScreen sprintId={window.__editingSprintId || editingSprintId} projectId={activeProjectId} setScreen={setScreen} />}
-        {screen === "archive"     && <ArchiveScreen role={role} />}
-      </main>
+      {/* Mobile overlay */}
+      <div 
+        className={`mobile-overlay ${mobileMenuOpen ? 'active' : ''}`}
+        onClick={() => setMobileMenuOpen(false)}
+        style={{ pointerEvents: mobileMenuOpen ? 'auto' : 'none' }}
+      />
+
+      {/* Desktop/Mobile content wrapper */}
+      <div style={{ display: "flex", flex: 1, position: "relative" }}>
+        <Sidebar_Nav 
+          screen={screen} 
+          setScreen={setScreen} 
+          role={role} 
+          setRole={setRole}
+          mobileMenuOpen={mobileMenuOpen}
+          setMobileMenuOpen={setMobileMenuOpen}
+        />
+
+        <main className="alps-main">
+          {screen === "overview" && <window.OverviewScreen role={role} setScreen={setScreen} setActiveProjectId={setActiveProjectId} />}
+          {screen === "dashboard" && (
+            <DashboardScreen
+              role={role}
+              suggestions={suggestions}
+              onSuggestionUpdate={setSuggestions}
+              activeProjectId={activeProjectId}
+              fromPortfolio={fromPortfolio}
+              setScreen={setScreen}
+              setFromPortfolio={setFromPortfolio}
+            />
+          )}
+          {screen === "portfolio" && (
+            <PortfolioScreen
+              role={role}
+              setScreen={setScreen}
+              setActiveProjectId={setActiveProjectId}
+              setFromPortfolio={setFromPortfolio}
+            />
+          )}
+          {screen === "cycles"      && <CyclesScreen role={role} setScreen={setScreen} setActiveProjectId={setActiveProjectId} setFromPortfolio={setFromPortfolio} />}
+          {screen === "new-request" && <window.NewRequestScreen setScreen={setScreen} setActiveProjectId={setActiveProjectId} />}
+          {screen === "create-sprint" && <window.NewSprintForm projectId={activeProjectId || window.PROJECT.id} onSuccess={() => setScreen("overview")} />}
+          {screen === "create-ticket" && <window.NewRequestScreen setScreen={setScreen} setActiveProjectId={setActiveProjectId} />}
+          {screen === "sprint-detail" && (window.__editingSprintId || editingSprintId) && <window.SprintDetailScreen sprintId={window.__editingSprintId || editingSprintId} projectId={activeProjectId} setScreen={setScreen} />}
+          {screen === "archive"     && <ArchiveScreen role={role} />}
+        </main>
+      </div>
     </div>
   );
 }
 
 // ─── Sidebar navigation ───────────────────────────────────────────────────────
 
-function Sidebar_Nav({ screen, setScreen, role, setRole }) {
+function Sidebar_Nav({ screen, setScreen, role, setRole, mobileMenuOpen, setMobileMenuOpen }) {
   const navItems = [
     { id: "overview",    label: "Overview",    icon: window.Icon.list    },
     { id: "portfolio",   label: "Portfolio",   icon: window.Icon.inbox   },
@@ -89,8 +128,13 @@ function Sidebar_Nav({ screen, setScreen, role, setRole }) {
     { id: "archive",     label: "Archive",     icon: window.Icon.archive },
   ];
 
+  const handleNavClick = (screenId) => {
+    setScreen(screenId);
+    if (setMobileMenuOpen) setMobileMenuOpen(false);
+  };
+
   return (
-    <nav className="alps-sidebar" style={{ padding: "0", display: "flex", flexDirection: "column" }}>
+    <nav className={`alps-sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`} style={{ padding: "0", display: "flex", flexDirection: "column" }}>
       {/* Wordmark */}
       <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid var(--alps-border)", display: "flex", alignItems: "center", gap: "8px" }}>
         <div style={{ width: "24px", height: "24px", borderRadius: "4px", background: "var(--alps-primary)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 800, color: "white" }}>A</div>
@@ -105,7 +149,7 @@ function Sidebar_Nav({ screen, setScreen, role, setRole }) {
             return (
               <button
                 key={item.id}
-                onClick={() => setScreen(item.id)}
+                onClick={() => handleNavClick(item.id)}
                 style={{
                   width: "100%", display: "flex", alignItems: "center", gap: "10px",
                   padding: "8px 10px", marginBottom: "2px",
@@ -130,7 +174,7 @@ function Sidebar_Nav({ screen, setScreen, role, setRole }) {
         {/* Quick actions */}
         <div style={{ borderTop: "1px solid var(--alps-border)", paddingTop: "8px", display: "grid", gap: "6px" }}>
           <button
-            onClick={() => setScreen("create-sprint")}
+            onClick={() => handleNavClick("create-sprint")}
             style={{
               width: "100%", display: "flex", alignItems: "center", gap: "8px",
               padding: "8px 10px",
@@ -154,7 +198,7 @@ function Sidebar_Nav({ screen, setScreen, role, setRole }) {
             Create Sprint
           </button>
           <button
-            onClick={() => setScreen("create-ticket")}
+            onClick={() => handleNavClick("create-ticket")}
             style={{
               width: "100%", display: "flex", alignItems: "center", gap: "8px",
               padding: "8px 10px",
