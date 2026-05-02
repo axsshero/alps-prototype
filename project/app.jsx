@@ -223,21 +223,6 @@ function Sidebar_Nav({ screen, setScreen, role, setRole, mobileMenuOpen, setMobi
           </button>
         </div>
       </div>
-
-      {/* Role switcher */}
-      <div style={{ padding: "12px 16px", borderTop: "1px solid var(--alps-border)" }}>
-        <div style={{ fontSize: "10px", color: "var(--alps-text-muted)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "6px" }}>Role</div>
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          style={{ width: "100%", padding: "6px 8px", background: "var(--alps-bg)", border: "1px solid var(--alps-border)", borderRadius: "4px", color: "var(--alps-text)", fontSize: "12px", fontWeight: "600", cursor: "pointer" }}
-        >
-          <option value="pm">PM</option>
-          <option value="developer">Developer</option>
-          <option value="techLead">Tech Lead</option>
-          <option value="requestor">Requestor</option>
-        </select>
-      </div>
     </nav>
   );
 }
